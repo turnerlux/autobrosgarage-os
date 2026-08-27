@@ -43,3 +43,73 @@ describe("audit events", () => {
     });
   });
 });
+
+describe("listForEntities", () => {
+  it("returns events for any of the requested entity refs, oldest first", async () => {
+    const store = new InMemoryAuditStore();
+    await store.append(
+      createAuditEvent({
+        shopId,
+        actorType: "human",
+        action: "diagnostic_session.opened",
+        entityType: "diagnostic_session",
+        entityId: "session-1",
+        source: "web",
+      }),
+    );
+    await store.append(
+      createAuditEvent({
+        shopId,
+        actorType: "human",
+        action: "diagnostic_finding.created",
+        entityType: "diagnostic_finding",
+        entityId: "finding-1",
+        source: "web",
+      }),
+    );
+    await store.append(
+      createAuditEvent({
+        shopId,
+        actorType: "human",
+        action: "diagnostic_finding.created",
+        entityType: "diagnostic_finding",
+        entityId: "finding-unrelated",
+        source: "web",
+      }),
+    );
+
+    const events = await store.listForEntities(shopId, [
+      { entityType: "diagnostic_session", entityId: "session-1" },
+      { entityType: "diagnostic_finding", entityId: "finding-1" },
+    ]);
+
+    expect(events.map((event) => event.entityId)).toEqual(["session-1", "finding-1"]);
+  });
+
+  it("never returns another shop's events for the same entity id", async () => {
+    const store = new InMemoryAuditStore();
+    const otherShopId = "9f9f8732-e5bc-47db-b811-ffd67944dc99";
+    await store.append(
+      createAuditEvent({
+        shopId: otherShopId,
+        actorType: "human",
+        action: "diagnostic_session.opened",
+        entityType: "diagnostic_session",
+        entityId: "shared-id",
+        source: "web",
+      }),
+    );
+
+    const events = await store.listForEntities(shopId, [
+      { entityType: "diagnostic_session", entityId: "shared-id" },
+    ]);
+
+    expect(events).toHaveLength(0);
+  });
+
+  it("returns an empty list when given no refs", async () => {
+    const store = new InMemoryAuditStore();
+    const events = await store.listForEntities(shopId, []);
+    expect(events).toEqual([]);
+  });
+});

@@ -56,16 +56,35 @@ submit action.
 
 ## Phase 3 — Diagnostic platform
 
-- [ ] Diagnostic Session schema
-- [ ] Findings schema with Suspected / Testing / Confirmed states
-- [ ] DTC records
-- [ ] Test-performed / measurement / result records
-- [ ] Original technician note retention
-- [ ] Customer-facing cleaned diagnostic narrative
-- [ ] Photo/media attachments to findings
-- [ ] Scan report/document attachments
-- [ ] Diagnostic timeline/history
-- [ ] Explicit confirmation control for confirmed failures
+- [x] Diagnostic Session schema
+- [x] Findings schema with Suspected / Testing / Confirmed states
+- [x] DTC records
+- [x] Test-performed / measurement / result records
+- [x] Original technician note retention
+- [ ] Customer-facing cleaned diagnostic narrative — the human-editable field and setter
+      exist (`setCustomerFacingSummary`), but nothing drafts it automatically yet; AI-assisted
+      drafting is Phase 4's job
+- [x] Photo/media attachments to findings
+- [x] Scan report/document attachments
+- [x] Diagnostic timeline/history
+- [x] Explicit confirmation control for confirmed failures
+
+Delivered as data/service-layer modules (`src/diagnostics`, plus a `listForEntities`
+extension to `src/audit/store.ts`) with the same multi-tenant isolation, permission
+checks, and audit logging as Phase 1. No UI screens yet — this is backend/schema work
+only, matching how Phase 1 was delivered before Phase 2 added its first screen. See
+`docs/decisions/0003-managed-authentication-boundary.md` addendum for why diagnostics
+write paths still need a real `Session` before any UI can call them end-to-end.
+
+A finding only reaches `confirmed` through the dedicated `confirmFindingRecord` service
+function (never through the generic status-update path), which always records who
+confirmed it and always emits its own audit event — the "explicit confirmation control"
+item specifically asked for that failure mode to be deliberate and attributable, not an
+incidental side effect of a routine status change.
+
+The diagnostic timeline reuses the existing audit-event log (`AuditStore.listForEntities`)
+across a session and everything under it — findings, DTCs, tests, attachments — rather
+than a bespoke history table, since every mutation already writes an audit event.
 
 ## Phase 4 — Auto Bros AI foundation
 
