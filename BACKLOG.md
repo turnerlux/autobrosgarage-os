@@ -6,7 +6,7 @@ Work top-down unless a dependency requires otherwise. Significant UX/business ch
 
 - [x] Initialize Next.js + TypeScript application
 - [x] Add linting, formatting, unit test framework, and basic CI
-- [ ] Configure environment variable validation
+- [x] Configure environment variable validation
 - [ ] Establish PostgreSQL database and migrations
 - [ ] Add managed authentication foundation with role support
 - [ ] Define preview/staging and production environment strategy
