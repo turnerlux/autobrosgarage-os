@@ -43,7 +43,7 @@ The exact managed providers may be chosen during implementation as long as they 
 
 ## Local development
 
-The application foundation uses Node.js 24 and pnpm 11. Install dependencies with `pnpm install`, copy `.env.example` to `.env.local`, then run `pnpm dev` and open `http://localhost:3000`. Local defaults do not require real credentials; see `docs/environment.md` for promotion requirements.
+The application foundation uses Node.js 24 and pnpm 11. Install dependencies with `pnpm install`, copy `.env.example` to `.env.local`, then run `pnpm dev` and open `http://localhost:3000`. Local defaults do not require real credentials. See `docs/local-development.md` for the complete setup and `docs/environment.md` for promotion requirements.
 
 Current verification commands:
 

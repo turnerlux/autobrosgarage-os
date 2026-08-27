@@ -13,7 +13,7 @@ Work top-down unless a dependency requires otherwise. Significant UX/business ch
 - [x] Add structured logging and audit-event framework
 - [x] Add secure object/file storage abstraction
 - [x] Add error handling and user-safe error states
-- [ ] Document local development setup
+- [x] Document local development setup
 
 ## Phase 1 — Core records
 
