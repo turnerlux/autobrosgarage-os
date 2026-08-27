@@ -28,6 +28,7 @@ For each backlog item:
 ## Autonomy
 
 You may make routine engineering decisions independently, including:
+
 - component structure
 - naming
 - database indexes
@@ -46,6 +47,7 @@ Do not stop merely because a minor implementation choice is unspecified. Make a 
 Significant product/business changes should be prepared for preview and presented to the owner for review.
 
 Examples:
+
 - major workflow redesign
 - new customer-facing flow
 - changes to quote behavior
@@ -59,6 +61,7 @@ When waiting on owner review, continue safe independent backlog work, tests, doc
 ## Never autonomously
 
 Do not independently:
+
 - move business funds
 - change bank/payment destination information
 - issue material refunds
@@ -109,6 +112,7 @@ Do not independently:
 ## Development safety
 
 Before large schema or architecture changes:
+
 - assess migration impact
 - preserve rollback path
 - avoid production data loss
@@ -119,6 +123,7 @@ Use preview/staging before production for material changes.
 ## Definition of done
 
 A backlog item is not done merely because code was written. It should have:
+
 - implementation
 - validation/error handling
 - appropriate tests

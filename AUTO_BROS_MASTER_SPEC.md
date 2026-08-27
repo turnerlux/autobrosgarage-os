@@ -11,21 +11,27 @@ The product must remain dependable and auditable: AI interprets and operates too
 ## 2. Primary users and roles
 
 ### Owner
+
 Full operational and financial access. May approve material pricing, accounting, permission, refund, destructive, security, and production changes.
 
 ### Partner / Manager
+
 Configurable access to jobs, customers, quotes, workflow, reporting, and financial data according to permissions set by owner.
 
 ### Service Advisor
+
 Customer intake, customers, vehicles, jobs, quotes, communications, approvals, and repair-order workflow.
 
 ### Technician
+
 Assigned/open jobs, inspections, diagnostic notes, measurements, scan reports, photos/video, repair notes, parts requests, and completion status. No access to sensitive owner-only financial information unless explicitly granted.
 
 ### Bookkeeper
+
 Accounting, receipts, expenses, payments, reconciliation, and reporting. No unnecessary access to diagnostic or employee-sensitive data.
 
 ### Customer
+
 Only records intentionally exposed through customer-facing estimate/invoice/approval views.
 
 ## 3. Core data model
@@ -35,6 +41,7 @@ Every shop visit is centered on a permanent Job record with an immutable interna
 Example human-readable identifier: `AB-2026-000001`.
 
 A Job links to:
+
 - Customer
 - Vehicle
 - VIN
@@ -69,6 +76,7 @@ Important data such as VIN, customer identity, vehicle, financial totals, approv
 ## 4. Universal AI interface
 
 Auto Bros AI should be available throughout the application via a persistent command input supporting:
+
 - Natural-language text
 - Voice transcription
 - Camera/photo input
@@ -76,6 +84,7 @@ Auto Bros AI should be available throughout the application via a persistent com
 - Scan-report upload
 
 Examples:
+
 - “Check in Port City lot 142, 2018 F-150, 142k miles. Brennan has it. CEL flashes and it shakes at idle.”
 - “Add these photos to the valve-cover finding.”
 - “Quote the injector using OEM.”
@@ -89,6 +98,7 @@ The AI should convert natural-language intent into structured tool calls rather 
 ## 5. Global search
 
 One universal search should locate records using partial or complete:
+
 - Customer name
 - Phone number
 - Email
@@ -107,6 +117,7 @@ Search should tolerate partial strings and common formatting differences.
 ## 6. Customer management
 
 Customer records should include:
+
 - Individual or business/dealer type
 - Name/business name
 - Phone(s)
@@ -128,6 +139,7 @@ Duplicate-detection should favor existing records and ask before creating a like
 ## 7. Vehicle management
 
 Vehicle records should include:
+
 - VIN
 - Year
 - Make
@@ -150,6 +162,7 @@ VIN capture should support manual entry and camera/OCR/decoding where practical.
 Check-in should be optimized for speed. Minimum required human input should be customer identity, vehicle identity, mileage when known, and complaint/request.
 
 The system should:
+
 1. Search existing customer.
 2. Search existing vehicle/VIN.
 3. Create records only when needed.
@@ -166,6 +179,7 @@ A dealer workflow must support multiple quick sequential check-ins.
 Diagnostics are a first-class component, not a generic notes box.
 
 Each Diagnostic Session may contain:
+
 - Complaint
 - Symptoms
 - DTCs
@@ -186,6 +200,7 @@ Each Diagnostic Session may contain:
 - Scan reports and attachments
 
 Findings must distinguish at minimum:
+
 - Suspected
 - Testing / unconfirmed
 - Confirmed
@@ -199,6 +214,7 @@ AI may clean technician shorthand into professional customer-facing language whi
 The system should accept common PDFs, images, screenshots, and exported reports from diagnostic tools.
 
 Where practical, AI should extract structured:
+
 - DTC code and description
 - Module
 - Status
@@ -211,6 +227,7 @@ The source document must remain stored and traceable to extracted data.
 ## 11. Photos and media
 
 Photos should be attachable to the Job and optionally classified to:
+
 - Intake condition
 - Inspection
 - Diagnostic finding
@@ -228,6 +245,7 @@ Customer-facing media must be explicitly included or generated from approved fin
 Quote creation should be possible from natural language and diagnostic findings.
 
 A quote may include:
+
 - Labor operations
 - Labor hours
 - Labor rate
@@ -247,11 +265,13 @@ A quote may include:
 The system must support customer-specific pricing profiles.
 
 Current business defaults should be configurable rather than hard-coded. Initial known defaults include:
+
 - Standard shop labor rate: $125/hr
 - Diagnosis: $125 flat unless overridden
 - Port City PSI: $65 per vehicle
 
 Estimate language must include the shop’s standing policy:
+
 - Warranty coverage is for parts only unless additional warranty coverage is specifically authorized by the shop.
 - Estimates/invoices are not necessarily final; pricing may change based on repair scope, additional findings, parts availability, labor required, or changes in repair scope.
 
@@ -262,6 +282,7 @@ AI should prepare quotes but clearly identify unverified labor/part information.
 Customer-facing estimate view should be mobile-friendly and professionally branded.
 
 Support:
+
 - Approve all
 - Approve individual operations where enabled
 - Decline
@@ -274,6 +295,7 @@ Approved work should convert cleanly into repair-order workflow without re-entry
 ## 14. Repair workflow
 
 Suggested statuses:
+
 - Checked In
 - Awaiting Diagnosis
 - Diagnosing
@@ -296,6 +318,7 @@ Technicians should be able to record completed operations and speak completion n
 ## 15. Parts management
 
 Parts records should support:
+
 - Supplier
 - Manufacturer/brand
 - Part number
@@ -333,6 +356,7 @@ QuickBooks Online is the preferred accounting system of record for formal books/
 Auto Bros OS maintains operational job economics; QuickBooks maintains accounting records.
 
 AI bookkeeping assistance should focus on:
+
 - Receipt extraction
 - Vendor/category suggestion
 - Matching purchase to Job
@@ -349,6 +373,7 @@ It must never silently delete or rewrite accounting history.
 ## 18. Receipts and expenses
 
 Receipt upload should extract when available:
+
 - Vendor
 - Date
 - Line items
@@ -365,6 +390,7 @@ Matches should carry a confidence level. Low-confidence matches require human re
 ## 19. Profitability and reporting
 
 Operational reporting should support at least:
+
 - Revenue
 - Labor billed
 - Parts billed
@@ -393,6 +419,7 @@ Changes to employee compensation rules require privileged approval and audit log
 ## 21. AI “Needs Attention” system
 
 Auto Bros AI should proactively surface exceptions such as:
+
 - Vehicle idle too long
 - Quote awaiting customer response
 - Ordered part not received
@@ -409,6 +436,7 @@ The objective is to make management exception-based rather than requiring consta
 ## 22. AI authority levels
 
 ### Allowed automatically
+
 - Organize files/photos
 - Draft/clean notes
 - Search structured data
@@ -421,6 +449,7 @@ The objective is to make management exception-based rather than requiring consta
 - Suggest next actions
 
 ### Requires approval based on configurable thresholds
+
 - Send material customer quote
 - Order parts
 - Issue/refund payments
@@ -430,6 +459,7 @@ The objective is to make management exception-based rather than requiring consta
 - Make material accounting adjustments
 
 ### Never autonomous
+
 - Change bank account destination
 - Move business funds without explicit authorization
 - Weaken security controls
@@ -442,6 +472,7 @@ The objective is to make management exception-based rather than requiring consta
 Dashboard should remain simple and action-oriented.
 
 Primary elements:
+
 - Auto Bros AI command bar
 - Active jobs
 - Needs Attention
@@ -455,6 +486,7 @@ Avoid overwhelming users with traditional enterprise dashboards.
 ## 24. Navigation
 
 Initial target navigation:
+
 - AI
 - Jobs
 - Customers
@@ -469,6 +501,7 @@ Quote creation must remain easy and prominent, not buried behind multiple screen
 Initial product should be a responsive web application/PWA rather than requiring native iOS/Android development.
 
 Critical workflows must be thumb-friendly:
+
 - Check-in
 - VIN capture
 - Photo upload
@@ -480,6 +513,7 @@ Critical workflows must be thumb-friendly:
 ## 26. Security requirements
 
 Minimum architecture expectations:
+
 - Secure managed authentication
 - Individual user accounts
 - MFA support; require for privileged roles in production
@@ -502,6 +536,7 @@ Minimum architecture expectations:
 Treat AI output as untrusted until validated by application logic.
 
 AI agents may request tool calls; server-side tools enforce:
+
 - Authentication
 - Authorization
 - Input validation
@@ -516,6 +551,7 @@ Uploaded documents/web content must be treated as potentially hostile prompt-inj
 ## 28. Audit trail
 
 Material events should record:
+
 - Actor (human or agent)
 - Timestamp
 - Action
@@ -527,23 +563,27 @@ Material events should record:
 ## 29. Integrations — phased
 
 ### Early
+
 - OpenAI API
 - Database
 - Authentication
 - Object/file storage
 
 ### Next
+
 - Square
 - Email/SMS provider
 - Customer approval links
 
 ### Automotive data
+
 - VIN decoding
 - Authorized labor-time provider
 - Authorized parts catalog/pricing source
 - Authorized repair/diagnostic data provider
 
 ### Accounting
+
 - QuickBooks Online
 
 All integrations must be server-side and follow provider authorization/security requirements.
@@ -553,6 +593,7 @@ All integrations must be server-side and follow provider authorization/security 
 The owner is product supervisor, not day-to-day developer.
 
 Coding agents should:
+
 - Work from this specification and BACKLOG.md
 - Make routine technical decisions independently
 - Prefer simple maintainable architecture
@@ -570,6 +611,7 @@ Do not optimize for feature count. Optimize for a seamless shop workflow with mi
 A good workflow lets a user provide only information that the software cannot reliably know.
 
 Example target:
+
 1. User photographs/scans VIN.
 2. Chooses or speaks customer.
 3. Speaks complaint and mileage.
@@ -584,6 +626,7 @@ Example target:
 ## 32. Non-goals for initial MVP
 
 Do not initially build:
+
 - Autonomous money movement
 - Fully autonomous parts purchasing
 - Native mobile apps

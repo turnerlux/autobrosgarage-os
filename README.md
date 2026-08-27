@@ -47,7 +47,11 @@ The application foundation uses Node.js 24 and pnpm 11. Install dependencies wit
 
 Current verification commands:
 
+- `pnpm check` — formatting, linting, types, unit tests, and production build
+- `pnpm test` — unit tests only
 - `pnpm typecheck`
 - `pnpm build`
+
+GitHub Actions runs the complete check suite for pushes and pull requests using read-only repository permissions.
 
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
