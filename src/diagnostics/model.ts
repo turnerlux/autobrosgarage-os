@@ -72,8 +72,8 @@ export function reopenDiagnosticSession(session: DiagnosticSession): DiagnosticS
 export const findingStatuses = ["suspected", "testing", "confirmed", "ruled_out"] as const;
 export type FindingStatus = (typeof findingStatuses)[number];
 
-const settableFindingStatuses = ["suspected", "testing", "ruled_out"] as const;
-type SettableFindingStatus = (typeof settableFindingStatuses)[number];
+export const settableFindingStatuses = ["suspected", "testing", "ruled_out"] as const;
+export type SettableFindingStatus = (typeof settableFindingStatuses)[number];
 
 const findingInputSchema = z.object({
   shopId: z.uuid(),

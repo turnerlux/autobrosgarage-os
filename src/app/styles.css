@@ -492,7 +492,8 @@ h1 {
 
 /* Check-in screen (Phase 2) */
 
-.checkin-workspace h1 {
+.checkin-workspace h1,
+.diagnostics-workspace h1 {
   font-size: clamp(2rem, 6vw, 3.4rem);
   letter-spacing: -0.055em;
   line-height: 1.02;
@@ -500,11 +501,13 @@ h1 {
   max-width: 20ch;
 }
 
-.checkin-workspace > .intro {
+.checkin-workspace > .intro,
+.diagnostics-workspace > .intro {
   margin-top: 0.9rem;
 }
 
-.checkin-workspace label {
+.checkin-workspace label,
+.diagnostics-workspace label {
   display: block;
   font-size: 0.78rem;
   font-weight: 700;
@@ -516,7 +519,10 @@ h1 {
 .checkin-workspace input[type="email"],
 .checkin-workspace input[type="number"],
 .checkin-workspace textarea,
-.checkin-workspace select {
+.checkin-workspace select,
+.diagnostics-workspace input[type="text"],
+.diagnostics-workspace textarea,
+.diagnostics-workspace select {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.6rem;
@@ -527,24 +533,31 @@ h1 {
   width: 100%;
 }
 
-.checkin-workspace textarea {
+.checkin-workspace textarea,
+.diagnostics-workspace textarea {
   line-height: 1.5;
   resize: vertical;
 }
 
 .checkin-workspace input::placeholder,
-.checkin-workspace textarea::placeholder {
+.checkin-workspace textarea::placeholder,
+.diagnostics-workspace input::placeholder,
+.diagnostics-workspace textarea::placeholder {
   color: #6d7178;
 }
 
 .checkin-workspace input:focus-visible,
 .checkin-workspace textarea:focus-visible,
-.checkin-workspace select:focus-visible {
+.checkin-workspace select:focus-visible,
+.diagnostics-workspace input:focus-visible,
+.diagnostics-workspace textarea:focus-visible,
+.diagnostics-workspace select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
-.checkin-workspace input[aria-invalid="true"] {
+.checkin-workspace input[aria-invalid="true"],
+.diagnostics-workspace input[aria-invalid="true"] {
   border-color: var(--accent);
 }
 
@@ -753,5 +766,168 @@ h1 {
   }
   .mode-toggle {
     flex-direction: column;
+  }
+}
+
+/* Diagnostics screen (Phase 3) */
+
+.status-badge {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+}
+.status-badge-open,
+.status-badge-suspected {
+  border-color: var(--muted);
+  color: var(--text);
+}
+.status-badge-testing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.status-badge-confirmed,
+.status-badge-test-pass {
+  background: var(--success);
+  border-color: var(--success);
+  color: #0b0c0e;
+}
+.status-badge-ruled_out,
+.status-badge-closed {
+  opacity: 0.6;
+}
+.status-badge-test-fail {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text);
+}
+.status-badge-test-inconclusive {
+  border-color: var(--muted);
+}
+
+.diagnostics-session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.diagnostics-finding-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.diagnostics-finding-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 1rem;
+}
+
+.diagnostics-finding-card .checkin-section-head {
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.diagnostics-finding-note {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.diagnostics-finding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.diagnostics-confirm-button {
+  border-color: var(--success);
+  color: var(--success);
+}
+.diagnostics-confirm-button:disabled {
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.diagnostics-inline-form {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+.diagnostics-inline-form.checkin-grid {
+  align-items: end;
+}
+.diagnostics-inline-form button {
+  margin-top: 1rem;
+}
+
+.diagnostics-dtc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+.diagnostics-dtc-list li {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+}
+.diagnostics-dtc-list select {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font: inherit;
+  margin-left: 0.4rem;
+  min-height: 2.2rem;
+  padding: 0 0.5rem;
+}
+.diagnostics-dtc-list label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin: 0 0 0 auto;
+  white-space: nowrap;
+}
+
+.diagnostics-dtc-code {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.diagnostics-timeline {
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+.diagnostics-timeline li::marker {
+  color: var(--accent);
+}
+
+@media (max-width: 560px) {
+  .diagnostics-dtc-list select {
+    margin-left: 0;
+    width: 100%;
   }
 }

@@ -71,10 +71,23 @@ submit action.
 
 Delivered as data/service-layer modules (`src/diagnostics`, plus a `listForEntities`
 extension to `src/audit/store.ts`) with the same multi-tenant isolation, permission
-checks, and audit logging as Phase 1. No UI screens yet — this is backend/schema work
-only, matching how Phase 1 was delivered before Phase 2 added its first screen. See
+checks, and audit logging as Phase 1. See
 `docs/decisions/0003-managed-authentication-boundary.md` addendum for why diagnostics
 write paths still need a real `Session` before any UI can call them end-to-end.
+
+A preview-only `/diagnostics` screen (`src/app/diagnostics/page.tsx`) now exists, built
+the same way as the Phase 2 check-in screen: fully interactive against local component
+state with illustrative mock jobs, so the owner can exercise the whole intended
+workflow — open/close a session, log findings, move them through Suspected → Testing,
+record and link DTCs, log tests, and read the resulting timeline — with nothing
+persisted and no calls to the real `src/diagnostics` backend yet. It reuses the
+backend's own `dtcCodePattern` and `settableFindingStatuses` exports so the preview's
+validation and status rules can't drift from the service layer. Confirming a finding is
+its own dedicated button, separate from the routine status buttons, to visually carry
+forward the backend's "explicit confirmation control" design. Camera and scan-report
+upload buttons are present but permanently disabled, matching Phase 2's disabled-"Scan
+VIN"-button pattern. Wiring this screen to the real backend is blocked on the same
+sign-in provider decision as check-in (ADR 0003).
 
 A finding only reaches `confirmed` through the dedicated `confirmFindingRecord` service
 function (never through the generic status-update path), which always records who

@@ -6,7 +6,7 @@ export const dtcStatuses = ["active", "pending", "history"] as const;
 export type DtcStatus = (typeof dtcStatuses)[number];
 
 /** Standard OBD-II style codes (P/B/C/U + 4 digits), permissive enough for manufacturer variants. */
-const dtcCodePattern = /^[PBCU][0-9A-F]{4}$/;
+export const dtcCodePattern = /^[PBCU][0-9A-F]{4}$/;
 
 const dtcInputSchema = z.object({
   shopId: z.uuid(),
