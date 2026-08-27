@@ -8,7 +8,7 @@ Work top-down unless a dependency requires otherwise. Significant UX/business ch
 - [x] Add linting, formatting, unit test framework, and basic CI
 - [x] Configure environment variable validation
 - [x] Establish PostgreSQL database and migrations
-- [ ] Add managed authentication foundation with role support
+- [x] Add managed authentication foundation with role support
 - [ ] Define preview/staging and production environment strategy
 - [ ] Add structured logging and audit-event framework
 - [ ] Add secure object/file storage abstraction

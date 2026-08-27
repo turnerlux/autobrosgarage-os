@@ -56,4 +56,6 @@ GitHub Actions runs the complete check suite for pushes and pull requests using 
 
 PostgreSQL setup and migration commands are documented in `docs/database.md`. The repository includes a loopback-only local container; no hosted database or production credentials are configured.
 
+Authentication currently exposes a provider-neutral, fail-closed server boundary and tested role permissions. A managed provider must be selected and configured before sign-in is enabled; requirements are documented in `docs/decisions/0003-managed-authentication-boundary.md`.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
