@@ -8,6 +8,13 @@
       "when": 1787828482370,
       "tag": "0000_hot_valkyrie",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787829579302,
+      "tag": "0001_robust_speedball",
+      "breakpoints": true
     }
   ]
 }

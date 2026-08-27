@@ -60,4 +60,6 @@ Authentication currently exposes a provider-neutral, fail-closed server boundary
 
 Preview, staging, and production isolation and promotion requirements are documented in `docs/deployment.md`. Production deployment remains manual and no hosting vendor has been selected.
 
+Structured JSON logging and tenant-scoped, append-only audit events are documented in `docs/auditing.md`.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
