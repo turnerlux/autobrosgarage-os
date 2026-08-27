@@ -58,4 +58,6 @@ PostgreSQL setup and migration commands are documented in `docs/database.md`. Th
 
 Authentication currently exposes a provider-neutral, fail-closed server boundary and tested role permissions. A managed provider must be selected and configured before sign-in is enabled; requirements are documented in `docs/decisions/0003-managed-authentication-boundary.md`.
 
+Preview, staging, and production isolation and promotion requirements are documented in `docs/deployment.md`. Production deployment remains manual and no hosting vendor has been selected.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
