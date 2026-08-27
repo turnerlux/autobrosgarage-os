@@ -94,3 +94,19 @@ A persistent AI command-bar UI (the natural-language entry point end users would
 type into) is not part of this ADR. Per the ADR 0003 addendum pattern, once one exists it
 should ship first as a visual preview with no live provider or tool execution, the same way
 the check-in and diagnostics screens did ahead of the authentication provider decision.
+
+## Addendum (2026-08-27) — remaining Phase 4 tools
+
+The three tools left open when this ADR was first written are now implemented the same way
+as the original five: `create_vehicle` (wraps `createVehicleRecord`, including its existing
+same-VIN de-duplication), `create_job` (wraps `createJobRecord`, including real job-number
+generation), and `update_job` (wraps `updateJobStatus` and/or `assignTechnician`). All three
+sit in the "allowed automatically" tier from `AUTO_BROS_MASTER_SPEC.md` section 22 --
+draft-record creation and routine status/assignment changes gated by the same `jobs:write` /
+`customers:write` permission a human needs for the same action -- not the approval-required
+or never-autonomous tiers, which still have no tools and should not get any without a
+separate, explicit decision. `update_job`'s status changes are rejected for the same invalid
+transitions the job board itself rejects (`InvalidJobStatusTransitionError` from
+`src/jobs/model.ts`), so an AI-requested transition has no more authority than a human one.
+No AI model provider is connected by this addendum either -- that decision is still the
+owner's to make.

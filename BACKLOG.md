@@ -126,9 +126,14 @@ than a bespoke history table, since every mutation already writes an audit event
 - [x] Natural-language `find_customer` — `src/ai/tools/definitions.ts`
 - [x] `create_customer`
 - [x] `find_vehicle`
-- [ ] `create_vehicle`
-- [ ] `create_job`
-- [ ] `update_job`
+- [x] `create_vehicle` — wraps `createVehicleRecord`; returns the existing vehicle instead of a
+      duplicate when the VIN already matches one on file, same de-duplication behavior as the
+      check-in screen's mock duplicate-detection preview
+- [x] `create_job` — wraps `createJobRecord`; generates a real shop job number, requires an
+      existing customer and vehicle in the same shop
+- [x] `update_job` — wraps `updateJobStatus` and/or `assignTechnician`; status changes are still
+      validated by the job board's own allowed-transition rules, so an AI-requested transition
+      that a human couldn't make on the job board is rejected the same way
 - [x] `save_diagnostic` — implemented as `save_diagnostic_finding`, wraps `addFindingRecord`;
       can only ever create a `suspected` finding, never a confirmed one
 - [x] `get_service_history` — new `getVehicleServiceHistory` service function plus a
