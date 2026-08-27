@@ -15,6 +15,13 @@
       "when": 1787829579302,
       "tag": "0001_robust_speedball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787831704492,
+      "tag": "0002_brief_santa_claus",
+      "breakpoints": true
     }
   ]
 }

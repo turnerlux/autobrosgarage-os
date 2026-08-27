@@ -5,7 +5,7 @@ import { getServerEnvironment } from "@/lib/env/server";
 
 import * as schema from "./schema";
 
-type Database = NodePgDatabase<typeof schema>;
+export type Database = NodePgDatabase<typeof schema>;
 
 let pool: Pool | undefined;
 let database: Database | undefined;

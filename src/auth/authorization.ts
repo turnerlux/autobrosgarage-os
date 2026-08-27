@@ -68,3 +68,14 @@ export function requirePermission(
 
   return session;
 }
+
+/**
+ * Defense-in-depth tenant check. Store queries should already scope by shop,
+ * but every record touched by a service must also be verified here so a
+ * mismatched or forged identifier can never leak another shop's data.
+ */
+export function requireSameShop(session: Session, recordShopId: string): void {
+  if (session.user.shopId !== recordShopId) {
+    throw new PermissionDeniedError();
+  }
+}

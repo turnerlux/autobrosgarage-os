@@ -21,6 +21,8 @@ export type Permission = (typeof permissions)[number];
 
 export interface AuthenticatedUser {
   id: string;
+  /** Tenant boundary. Every authorization and data-access check is scoped to this shop. */
+  shopId: string;
   role: Role;
   displayName: string;
   active: boolean;

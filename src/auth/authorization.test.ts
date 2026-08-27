@@ -1,19 +1,20 @@
 import { describe, expect, it } from "vitest";
 
+import { testSession } from "../test/session";
+
 import {
   AuthenticationRequiredError,
   hasPermission,
   PermissionDeniedError,
   requirePermission,
+  requireSameShop,
 } from "./authorization";
-import type { Role, Session } from "./model";
+import type { Role } from "./model";
 
-function session(role: Role, active = true): Session {
-  return {
-    sessionId: "session-test",
-    authenticatedAt: new Date("2026-08-27T12:00:00Z"),
-    user: { id: "user-test", displayName: "Test User", role, active },
-  };
+const shopId = "1e8f8732-e5bc-47db-b811-ffd67944dc92";
+
+function session(role: Role, active = true) {
+  return testSession(role, { shopId, active });
 }
 
 describe("server authorization", () => {
@@ -44,5 +45,12 @@ describe("server authorization", () => {
     expect(() => requirePermission(session("service_advisor"), "money:write")).toThrow(
       PermissionDeniedError,
     );
+  });
+
+  it("rejects records that belong to a different shop", () => {
+    expect(() => requireSameShop(session("owner"), "another-shop-id")).toThrow(
+      PermissionDeniedError,
+    );
+    expect(() => requireSameShop(session("owner"), shopId)).not.toThrow();
   });
 });

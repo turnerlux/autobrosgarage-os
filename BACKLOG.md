@@ -17,16 +17,21 @@ Work top-down unless a dependency requires otherwise. Significant UX/business ch
 
 ## Phase 1 — Core records
 
-- [ ] Customer schema and CRUD
-- [ ] Vehicle schema and CRUD
-- [ ] Job schema and immutable human-readable job number
-- [ ] Customer ↔ vehicle relationships
-- [ ] Job ↔ customer ↔ vehicle relationships
-- [ ] Job status model
-- [ ] Technician/user assignment
-- [ ] Mileage and lot-number tracking
-- [ ] Record-level audit history for core changes
-- [ ] Universal search across customer, phone, VIN, vehicle, lot, job number
+- [x] Customer schema and CRUD
+- [x] Vehicle schema and CRUD
+- [x] Job schema and immutable human-readable job number
+- [x] Customer ↔ vehicle relationships
+- [x] Job ↔ customer ↔ vehicle relationships
+- [x] Job status model
+- [x] Technician/user assignment
+- [x] Mileage and lot-number tracking
+- [x] Record-level audit history for core changes
+- [x] Universal search across customer, phone, VIN, vehicle, lot, job number
+
+Delivered as data/service-layer modules (`src/customers`, `src/vehicles`, `src/jobs`,
+`src/search`, `src/tenancy`, `src/users`) with full multi-tenant isolation and audit
+logging. No UI screens yet — that begins in Phase 2 (Fast check-in), which will be the
+first owner-visible/previewable surface. See `docs/decisions/0005-multi-tenant-core-records.md`.
 
 ## Phase 2 — Fast check-in
 
