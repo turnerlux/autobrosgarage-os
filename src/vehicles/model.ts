@@ -2,8 +2,12 @@ import { randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
-/** Basic format check: 17 characters, excluding I/O/Q which VINs never use. Not a check-digit validator. */
-const vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/;
+/**
+ * Basic format check: 17 characters, excluding I/O/Q which VINs never use. Not a check-digit validator.
+ * Exported so client-side screens (e.g. the check-in flow) can reuse the exact same rule instead of
+ * duplicating it — the database/service layer remains the source of truth for what is actually accepted.
+ */
+export const vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/;
 
 const currentYear = new Date().getFullYear();
 

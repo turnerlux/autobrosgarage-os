@@ -35,15 +35,24 @@ first owner-visible/previewable surface. See `docs/decisions/0005-multi-tenant-c
 
 ## Phase 2 — Fast check-in
 
-- [ ] Mobile-first check-in screen
-- [ ] Returning-customer autocomplete
-- [ ] Dealer rapid check-in workflow
-- [ ] VIN manual entry and validation
-- [ ] VIN camera/photo capture abstraction
-- [ ] Natural-language complaint capture
-- [ ] Optional technician assignment at intake
-- [ ] Duplicate customer/vehicle detection
-- [ ] Create complete Job in one fast flow
+- [x] Mobile-first check-in screen (`/check-in`) — visual preview only, see note below
+- [x] Returning-customer autocomplete — client-side search over illustrative data, not real records yet
+- [x] Dealer rapid check-in workflow — mode toggle changes fields (account name, PO/RO #, drops email)
+- [x] VIN manual entry and validation — reuses the exact VIN regex from `src/vehicles/model.ts`
+- [x] VIN camera/photo capture abstraction — disabled "Scan VIN" button, matches the Phase 0 pattern
+- [x] Natural-language complaint capture — free-text field, no AI processing yet (Phase 4)
+- [x] Optional technician assignment at intake — illustrative technician list, not from a real staff table
+- [x] Duplicate customer/vehicle detection — illustrative confirmation banner when a VIN matches mock data
+- [ ] Create complete Job in one fast flow — blocked on a real session; see below
+
+**Preview-only by design:** no sign-in provider is configured yet (`docs/decisions/0003-managed-authentication-boundary.md`),
+and the app fails closed rather than trust a client-asserted identity. The owner chose to build this screen's
+look, layout, and interactions now and wire it to real data later, rather than add any authentication
+workaround. As a result the "Start check-in" button stays disabled and no data typed into this screen is
+saved — see `docs/decisions/0003-managed-authentication-boundary.md` addendum. Once a provider is chosen,
+the screen should call the already-built `createCustomerRecord` / `createVehicleRecord` / `createJobRecord`
+services (Phase 1) with a real `Session`, replacing the mock customer/technician data and enabling the
+submit action.
 
 ## Phase 3 — Diagnostic platform
 

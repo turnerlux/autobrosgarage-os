@@ -22,3 +22,17 @@ Provider selection is deferred because it can create recurring cost and operatio
 - Technicians cannot access money permissions.
 - Inactive internal users are denied even if the external provider session remains valid.
 - Future permission changes require tests and audit events; owner/admin permission changes are not autonomous actions.
+
+## Addendum (2026-08-27) — screens built before a provider is chosen
+
+Phase 2 needed an owner-visible check-in screen before this ADR's provider decision is made. Rather than
+add any interim shortcut this ADR forbids (dev-only login, header/cookie impersonation, a default owner),
+the owner chose to build Phase 2 screens as **visual previews**: real layout and client-side interaction,
+backed by illustrative/mock data, with no calls into the session-backed services from Phase 1
+(`createCustomerRecord`, `createVehicleRecord`, `createJobRecord`, `universalSearch`) and no persistence.
+Any action that would need a real identity (starting a check-in, saving a record) stays disabled in the UI.
+
+This pattern should be reused for future Phase 2/3 screens built ahead of the provider decision, so no
+screen accidentally implies data is being saved when it is not. Once a provider is selected and Phase 1's
+`Session` can be resolved from a real request, these screens should be wired to the real services and this
+addendum can be considered resolved.

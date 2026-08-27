@@ -489,3 +489,269 @@ h1 {
   color: var(--accent);
   font-size: 1.25rem;
 }
+
+/* Check-in screen (Phase 2) */
+
+.checkin-workspace h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+  margin: 0.8rem 0 0;
+  max-width: 20ch;
+}
+
+.checkin-workspace > .intro {
+  margin-top: 0.9rem;
+}
+
+.checkin-workspace label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 1rem 0 0.4rem;
+}
+
+.checkin-workspace input[type="text"],
+.checkin-workspace input[type="tel"],
+.checkin-workspace input[type="email"],
+.checkin-workspace input[type="number"],
+.checkin-workspace textarea,
+.checkin-workspace select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  color: var(--text);
+  font: inherit;
+  min-height: 2.9rem;
+  padding: 0.6rem 0.75rem;
+  width: 100%;
+}
+
+.checkin-workspace textarea {
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.checkin-workspace input::placeholder,
+.checkin-workspace textarea::placeholder {
+  color: #6d7178;
+}
+
+.checkin-workspace input:focus-visible,
+.checkin-workspace textarea:focus-visible,
+.checkin-workspace select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.checkin-workspace input[aria-invalid="true"] {
+  border-color: var(--accent);
+}
+
+.mode-toggle {
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: clamp(1.75rem, 5vw, 2.5rem) 0 0;
+  padding: 0;
+}
+.mode-toggle legend {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  text-transform: uppercase;
+  width: 100%;
+}
+.mode-option {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 650;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0;
+  min-height: 3rem;
+  padding: 0 0.75rem;
+  text-align: center;
+}
+.mode-option.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.mode-option input {
+  accent-color: var(--accent);
+}
+
+.checkin-section {
+  border-top: 1px solid var(--border);
+  margin-top: clamp(1.75rem, 5vw, 2.5rem);
+  padding-top: clamp(1.75rem, 5vw, 2.5rem);
+}
+.checkin-section-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+.checkin-section h2,
+.checkin-section > h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.ghost-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  min-height: 2.5rem;
+  padding: 0 0.85rem;
+}
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.checkin-selected-customer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+}
+.checkin-selected-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+.checkin-selected-detail {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0.3rem 0 0;
+}
+
+.checkin-suggestions {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  overflow: hidden;
+  padding: 0;
+}
+.checkin-suggestions li + li {
+  border-top: 1px solid var(--border);
+}
+.checkin-suggestions button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  display: flex;
+  font: inherit;
+  justify-content: space-between;
+  min-height: 3rem;
+  padding: 0 1rem;
+  text-align: left;
+  width: 100%;
+}
+.checkin-suggestion-detail {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.checkin-hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.6rem 0 0;
+}
+
+.checkin-grid {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.checkin-vin-row {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+}
+.checkin-vin-field {
+  flex: 1;
+}
+.checkin-vin-row .ghost-button {
+  margin-top: 1.85rem;
+}
+
+.field-error {
+  color: var(--accent);
+  font-size: 0.78rem;
+  margin: 0.4rem 0 0;
+}
+
+.checkin-duplicate {
+  background: var(--accent-soft);
+  border: 1px solid #563023;
+  border-radius: 0.9rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+}
+.checkin-duplicate h2 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+.checkin-duplicate p {
+  color: #c6aca5;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.4rem 0 0;
+}
+.checkin-duplicate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.checkin-duplicate-actions button:first-child {
+  background: var(--text);
+  border: 0;
+  border-radius: 0.55rem;
+  color: var(--background);
+  font-weight: 650;
+  min-height: 2.6rem;
+  padding: 0 0.9rem;
+}
+
+.checkin-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: clamp(1.75rem, 5vw, 2.5rem);
+}
+.checkin-submit-row .quote-button {
+  width: 100%;
+}
+
+@media (min-width: 560px) {
+  .checkin-submit-row .quote-button {
+    width: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .checkin-grid {
+    grid-template-columns: 1fr;
+  }
+  .mode-toggle {
+    flex-direction: column;
+  }
+}
