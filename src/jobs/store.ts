@@ -1,4 +1,4 @@
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "drizzle-orm";
 
 import type { Database } from "../db/client";
 import { jobs } from "../db/schema";
@@ -11,6 +11,8 @@ export interface JobStore {
   update(shopId: string, id: string, job: Job): Promise<void>;
   /** Partial, case-insensitive search across job number and lot number for universal search. */
   search(shopId: string, queryText: string): Promise<Job[]>;
+  /** Every job on record for one vehicle, newest first -- the basis for service history. */
+  listByVehicle(shopId: string, vehicleId: string): Promise<Job[]>;
 }
 
 export class InMemoryJobStore implements JobStore {
@@ -42,6 +44,12 @@ export class InMemoryJobStore implements JobStore {
           job.lotNumber?.toLowerCase().includes(needle) ||
           job.complaint.toLowerCase().includes(needle)),
     );
+  }
+
+  async listByVehicle(shopId: string, vehicleId: string): Promise<Job[]> {
+    return [...this.jobsById.values()]
+      .filter((job) => job.shopId === shopId && job.vehicleId === vehicleId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }
 
@@ -81,6 +89,15 @@ export class DatabaseJobStore implements JobStore {
         ),
       )
       .limit(20);
+    return rows as Job[];
+  }
+
+  async listByVehicle(shopId: string, vehicleId: string): Promise<Job[]> {
+    const rows = await this.database
+      .select()
+      .from(jobs)
+      .where(and(eq(jobs.shopId, shopId), eq(jobs.vehicleId, vehicleId)))
+      .orderBy(desc(jobs.createdAt));
     return rows as Job[];
   }
 }

@@ -1,5 +1,6 @@
 export * from "./app-schema";
 export * from "./audit";
+export * from "./business-settings";
 export * from "./customers";
 export * from "./diagnostic-attachments";
 export * from "./diagnostic-findings";

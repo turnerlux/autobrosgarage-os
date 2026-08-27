@@ -14,7 +14,12 @@ import { createVehicle } from "../vehicles/model";
 import { InMemoryVehicleStore } from "../vehicles/store";
 
 import { InMemoryJobNumberCounterStore } from "./job-number";
-import { assignTechnician, createJobRecord, updateJobStatus } from "./service";
+import {
+  assignTechnician,
+  createJobRecord,
+  getVehicleServiceHistory,
+  updateJobStatus,
+} from "./service";
 import { InMemoryJobStore } from "./store";
 
 async function buildFixture() {
@@ -142,5 +147,39 @@ describe("job service", () => {
     const updated = await assignTechnician(session, stores, job.id, technician.id);
     expect(updated.assignedTechnicianId).toBe(technician.id);
     expect(stores.audit.events.some((event) => event.action === "job.assigned")).toBe(true);
+  });
+
+  it("returns a vehicle's jobs newest first as its service history", async () => {
+    const { session, customer, vehicle, stores } = await buildFixture();
+    const first = await createJobRecord(session, stores, {
+      customerId: customer.id,
+      vehicleId: vehicle.id,
+      complaint: "Won't start",
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const second = await createJobRecord(session, stores, {
+      customerId: customer.id,
+      vehicleId: vehicle.id,
+      complaint: "Check engine light",
+    });
+
+    const history = await getVehicleServiceHistory(session, stores, vehicle.id);
+    expect(history.map((job) => job.id)).toEqual([second.id, first.id]);
+  });
+
+  it("rejects a vehicle id from another shop", async () => {
+    const { session, stores } = await buildFixture();
+    const otherShop = createShop({
+      name: "Other Shop",
+      slug: "other-shop-2",
+      jobNumberPrefix: "OS",
+    });
+    await stores.shops.insert(otherShop);
+    const otherVehicle = createVehicle({ shopId: otherShop.id, vin: "2GNSKBE07DR654321" });
+    await stores.vehicles.insert(otherVehicle);
+
+    await expect(getVehicleServiceHistory(session, stores, otherVehicle.id)).rejects.toThrow(
+      ApplicationError,
+    );
   });
 });

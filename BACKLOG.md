@@ -101,21 +101,48 @@ than a bespoke history table, since every mutation already writes an audit event
 
 ## Phase 4 — Auto Bros AI foundation
 
-- [ ] Server-side OpenAI integration abstraction
-- [ ] Persistent Auto Bros system/business instruction layer
-- [ ] Tool-call registry with strict schemas
-- [ ] Tool authorization middleware
-- [ ] Audit logging for AI-initiated actions
-- [ ] Persistent AI command bar UI
-- [ ] Natural-language `find_customer`
-- [ ] `create_customer`
-- [ ] `find_vehicle`
+- [x] Server-side OpenAI integration abstraction — provider-neutral interface
+      (`src/ai/provider.ts`) plus a fail-closed `UnconfiguredAiModelProvider`, the same
+      pattern as `src/auth/provider.ts`. No real OpenAI (or any other) connection exists
+      yet; connecting one is a paid-provider decision reserved for the owner — see
+      `docs/decisions/0006-ai-model-provider-boundary.md`.
+- [x] Persistent Auto Bros system/business instruction layer — `src/business-settings/`,
+      a versioned, per-shop, database-backed record of labor rate, diagnosis fee, and
+      policy text (seeded from `AUTO_BROS_MASTER_SPEC.md` section 12 defaults), read-gated
+      on `estimates:read` and write-gated on owner-only `settings:manage`, audit-logged on
+      every change.
+- [x] Tool-call registry with strict schemas — `src/ai/tools/registry.ts`, `zod`-validated
+      arguments, one entry point (`ToolRegistry.invoke`) every tool call goes through.
+- [x] Tool authorization middleware — the registry calls the exact same `requirePermission`
+      matrix every human-facing route uses; a role that cannot do something through the UI
+      cannot do it through a tool call either.
+- [x] Audit logging for AI-initiated actions — every invoke attempt (success, permission
+      denial, invalid arguments, or handler failure) writes an `ai_tool.*` audit event
+      (`actorType: "agent"`, `source: "ai_tool"`, both pre-existing enum values) alongside
+      whatever domain audit event the underlying service writes.
+- [ ] Persistent AI command bar UI — not built yet; per the ADR 0003 pattern, this should
+      ship first as a visual preview (no live provider, no real tool execution) the same
+      way check-in and diagnostics did ahead of the auth-provider decision.
+- [x] Natural-language `find_customer` — `src/ai/tools/definitions.ts`
+- [x] `create_customer`
+- [x] `find_vehicle`
 - [ ] `create_vehicle`
 - [ ] `create_job`
 - [ ] `update_job`
-- [ ] `save_diagnostic`
-- [ ] `get_service_history`
-- [ ] Ensure AI cannot bypass application authorization/business rules
+- [x] `save_diagnostic` — implemented as `save_diagnostic_finding`, wraps `addFindingRecord`;
+      can only ever create a `suspected` finding, never a confirmed one
+- [x] `get_service_history` — new `getVehicleServiceHistory` service function plus a
+      `listByVehicle` addition to `JobStore`
+- [x] Ensure AI cannot bypass application authorization/business rules — every tool handler
+      calls into the real Phase 1/3 service function rather than touching stores directly,
+      so the same permission checks, tenant checks, and validation a human action would go
+      through apply identically to an AI-initiated one; proven by tests (e.g. a technician
+      session is denied `create_customer` through the tool exactly as it would be through
+      the web route).
+
+No real AI model provider is connected. Nothing in this phase calls out to, or requires
+credentials for, any external AI service — see `docs/decisions/0006-ai-model-provider-boundary.md`
+for what is deferred to the owner and why.
 
 ## Phase 5 — Files, photos, and scan ingestion
 
