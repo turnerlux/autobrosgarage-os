@@ -40,3 +40,14 @@ The owner acts as product supervisor. Coding agents may autonomously implement a
 - Preview and production environments
 
 The exact managed providers may be chosen during implementation as long as they satisfy the master specification and security requirements.
+
+## Local development
+
+The application foundation uses Node.js 24 and pnpm 11. Install dependencies with `pnpm install`, then run `pnpm dev` and open `http://localhost:3000`.
+
+Current verification commands:
+
+- `pnpm typecheck`
+- `pnpm build`
+
+The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.

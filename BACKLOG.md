@@ -4,7 +4,7 @@ Work top-down unless a dependency requires otherwise. Significant UX/business ch
 
 ## Phase 0 — Foundation
 
-- [ ] Initialize Next.js + TypeScript application
+- [x] Initialize Next.js + TypeScript application
 - [ ] Add linting, formatting, unit test framework, and basic CI
 - [ ] Configure environment variable validation
 - [ ] Establish PostgreSQL database and migrations
