@@ -62,4 +62,6 @@ Preview, staging, and production isolation and promotion requirements are docume
 
 Structured JSON logging and tenant-scoped, append-only audit events are documented in `docs/auditing.md`.
 
+Private media uses a tenant-prefixed, validated storage boundary documented in `docs/storage.md`. No storage vendor or credential is connected.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
