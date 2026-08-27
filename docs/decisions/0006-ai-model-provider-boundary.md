@@ -110,3 +110,21 @@ transitions the job board itself rejects (`InvalidJobStatusTransitionError` from
 `src/jobs/model.ts`), so an AI-requested transition has no more authority than a human one.
 No AI model provider is connected by this addendum either -- that decision is still the
 owner's to make.
+
+## Addendum (2026-08-27) — AI command bar UI preview
+
+The "not yet built" item above is now built: `src/app/ai/page.tsx` is a visual preview of the
+AI command bar, following the exact pattern this ADR anticipated. It renders entirely from
+local component state -- no live provider, no call into `AiModelProvider` or
+`createAiToolRegistry()`, no real `Session`. The owner can click one of five example prompts
+(each labeled with the real tool it would call -- `find_customer`, `get_service_history`,
+`create_job`, `save_diagnostic_finding`, or `update_job`) or type a free-form question; both
+paths append a canned, hard-coded reply to a local conversation list rather than generating
+or executing anything. The screen also lists all 8 currently-registered tools with their
+name, description, and required permission, copied verbatim from
+`src/ai/tools/definitions.ts` so this preview cannot silently drift out of sync with what the
+registry actually exposes. Camera and voice input stay disabled (those input modes are not
+built at all yet, independent of the provider decision). The home page's "AI" navigation
+item now links to this screen instead of an inert anchor. Connecting this preview to a real
+conversation still requires both a chosen sign-in provider (ADR 0003) and a chosen AI model
+provider (this ADR) -- neither decision changes as a result of this addendum.

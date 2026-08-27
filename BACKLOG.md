@@ -120,9 +120,15 @@ than a bespoke history table, since every mutation already writes an audit event
       denial, invalid arguments, or handler failure) writes an `ai_tool.*` audit event
       (`actorType: "agent"`, `source: "ai_tool"`, both pre-existing enum values) alongside
       whatever domain audit event the underlying service writes.
-- [ ] Persistent AI command bar UI — not built yet; per the ADR 0003 pattern, this should
-      ship first as a visual preview (no live provider, no real tool execution) the same
-      way check-in and diagnostics did ahead of the auth-provider decision.
+- [x] Persistent AI command bar UI — `src/app/ai/page.tsx`, a visual preview screen (no
+      live provider, no real tool execution) following the same ADR 0003 pattern as
+      check-in and diagnostics. Lets the owner try example commands (each mapped to the
+      real registered tool it would call) and ask free-form questions; every reply is
+      canned locally, not generated, and the real `createAiToolRegistry()` / tool handlers
+      are never invoked. Also lists all 8 currently-registered tools with their required
+      permission, copied verbatim from `src/ai/tools/definitions.ts` so the preview can't
+      quietly drift from what the AI can actually do. Home page's "AI" nav item now links
+      here (previously an inert anchor). This was the last unchecked Phase 4 item.
 - [x] Natural-language `find_customer` — `src/ai/tools/definitions.ts`
 - [x] `create_customer`
 - [x] `find_vehicle`

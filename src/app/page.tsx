@@ -6,6 +6,10 @@ const workflowCards = [
 ];
 
 const navigation = ["AI", "Jobs", "Customers", "Diagnostics", "Money", "More"];
+const navigationHrefs: Record<string, string> = {
+  AI: "/ai",
+  Diagnostics: "/diagnostics",
+};
 
 export default function Home() {
   return (
@@ -102,13 +106,9 @@ export default function Home() {
       </section>
 
       <nav className="mobile-nav" aria-label="Primary navigation">
-        {navigation.map((item, index) => (
-          <a
-            href={index === 0 ? "#top" : `#${item.toLowerCase()}`}
-            key={item}
-            aria-current={index === 0 ? "page" : undefined}
-          >
-            <span aria-hidden="true">{index === 0 ? "✦" : "•"}</span>
+        {navigation.map((item) => (
+          <a href={navigationHrefs[item] ?? `#${item.toLowerCase()}`} key={item}>
+            <span aria-hidden="true">{item === "AI" ? "✦" : "•"}</span>
             {item}
           </a>
         ))}
