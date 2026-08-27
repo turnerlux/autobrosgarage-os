@@ -54,4 +54,6 @@ Current verification commands:
 
 GitHub Actions runs the complete check suite for pushes and pull requests using read-only repository permissions.
 
+PostgreSQL setup and migration commands are documented in `docs/database.md`. The repository includes a loopback-only local container; no hosted database or production credentials are configured.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.
