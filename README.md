@@ -64,4 +64,6 @@ Structured JSON logging and tenant-scoped, append-only audit events are document
 
 Private media uses a tenant-prefixed, validated storage boundary documented in `docs/storage.md`. No storage vendor or credential is connected.
 
+Unexpected failures are converted to user-safe messages, with mobile-friendly retry, loading, and not-found states that avoid exposing server details or record existence.
+
 The current shell contains no real customer data, credentials, financial integrations, or production services. Provider setup will be added through the dedicated foundation backlog items.

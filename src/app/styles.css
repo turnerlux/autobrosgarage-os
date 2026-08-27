@@ -405,3 +405,87 @@ h1 {
     scroll-behavior: auto;
   }
 }
+
+.error-screen {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: calc(100vh - 5rem);
+  padding: 1rem;
+}
+
+.error-panel,
+.loading-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  max-width: 34rem;
+  padding: clamp(1.25rem, 5vw, 2.25rem);
+  width: 100%;
+}
+
+.error-code {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.error-panel h1 {
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  letter-spacing: -0.055em;
+  margin: 0.65rem 0 0;
+}
+
+.error-panel p,
+.error-panel small {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.error-panel small {
+  display: block;
+  font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.4rem;
+}
+
+.error-actions button,
+.error-actions a {
+  align-items: center;
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.7rem;
+  color: white;
+  display: inline-flex;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1rem;
+  text-decoration: none;
+}
+
+.error-actions a + a,
+.error-actions button + a {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.loading-panel {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.loading-mark {
+  color: var(--accent);
+  font-size: 1.25rem;
+}
