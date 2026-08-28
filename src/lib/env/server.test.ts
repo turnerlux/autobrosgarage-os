@@ -7,6 +7,7 @@ describe("parseServerEnvironment", () => {
     expect(parseServerEnvironment({})).toEqual({
       APP_ENV: "local",
       APP_ORIGIN: "http://localhost:3000",
+      AUTH_SHOP_SLUG: "auto-bros-garage",
       LOG_LEVEL: "info",
     });
   });

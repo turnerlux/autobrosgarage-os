@@ -36,3 +36,10 @@ This pattern should be reused for future Phase 2/3 screens built ahead of the pr
 screen accidentally implies data is being saved when it is not. Once a provider is selected and Phase 1's
 `Session` can be resolved from a real request, these screens should be wired to the real services and this
 addendum can be considered resolved.
+
+## Addendum (2026-08-28) — owner selected closed-shop credentials
+
+The owner selected individual username/password accounts for the initial closed-shop rollout. ADR 0007
+documents the database-backed credentials adapter, secure session cookies, temporary lockout, and staff
+bootstrap flow. This replaces the unconfigured provider for server routes without weakening the existing
+role and tenant authorization checks. MFA is still required before a broader production rollout.

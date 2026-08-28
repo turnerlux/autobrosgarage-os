@@ -16,6 +16,7 @@ const serverEnvironmentSchema = z
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
     DATABASE_URL: optional(postgresUrl),
     AUTH_SECRET: optional(z.string().min(32, "must contain at least 32 characters")),
+    AUTH_SHOP_SLUG: z.string().trim().min(1).default("auto-bros-garage"),
     OBJECT_STORAGE_BUCKET: optional(z.string().min(1)),
     OPENAI_API_KEY: optional(z.string().min(20)),
   })

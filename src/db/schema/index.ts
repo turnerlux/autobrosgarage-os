@@ -1,4 +1,5 @@
 export * from "./app-schema";
+export * from "./auth-sessions";
 export * from "./audit";
 export * from "./business-settings";
 export * from "./customers";
@@ -11,4 +12,5 @@ export * from "./job-number-counters";
 export * from "./jobs";
 export * from "./shops";
 export * from "./users";
+export * from "./user-credentials";
 export * from "./vehicles";

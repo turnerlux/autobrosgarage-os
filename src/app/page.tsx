@@ -25,6 +25,9 @@ export default function Home() {
           </span>
         </a>
         <span className="environment-badge">Local foundation</span>
+        <a className="sign-in-link" href="/login">
+          Staff sign in
+        </a>
       </header>
 
       <section className="workspace" id="top">

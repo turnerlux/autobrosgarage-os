@@ -54,6 +54,11 @@ the screen should call the already-built `createCustomerRecord` / `createVehicle
 services (Phase 1) with a real `Session`, replacing the mock customer/technician data and enabling the
 submit action.
 
+**2026-08-28 update:** the owner selected closed-shop username/password accounts and the database-backed
+credentials/session adapter is now implemented (ADR 0007), including the login page and staff bootstrap
+for Turner, Arthur, Tuan, Brennan, Ryan, Jared, and Chase. The remaining unchecked Phase 2 item is no
+longer blocked on identity; the next milestone is wiring this screen to the real services and database.
+
 ## Phase 3 — Diagnostic platform
 
 - [x] Diagnostic Session schema

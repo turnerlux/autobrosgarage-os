@@ -36,6 +36,13 @@
       "when": 1787836820140,
       "tag": "0004_woozy_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787877756959,
+      "tag": "0005_mighty_zemo",
+      "breakpoints": true
     }
   ]
 }
