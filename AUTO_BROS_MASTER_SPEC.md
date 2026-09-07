@@ -47,6 +47,7 @@ A Job links to:
 - VIN
 - Mileage
 - Dealer/customer lot number when applicable
+- Work mode and location (shop, dealership site, or mobile address)
 - Customer complaint(s)
 - Intake notes
 - Assigned technician(s)

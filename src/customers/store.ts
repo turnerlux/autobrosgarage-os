@@ -110,20 +110,19 @@ export class DatabaseCustomerStore implements CustomerStore {
   }
 
   async search(shopId: string, queryText: string): Promise<Customer[]> {
-    const pattern = `%${queryText.trim()}%`;
+    const trimmed = queryText.trim();
+    const pattern = `%${trimmed}%`;
+    const digits = trimmed.replace(/\D/g, "");
+    const conditions = [
+      ilike(customers.displayName, pattern),
+      ilike(customers.email, pattern),
+      ilike(customers.phone, pattern),
+    ];
+    if (digits.length >= 3) conditions.push(ilike(customers.phoneDigits, `%${digits}%`));
     const rows = await this.database
       .select()
       .from(customers)
-      .where(
-        and(
-          eq(customers.shopId, shopId),
-          or(
-            ilike(customers.displayName, pattern),
-            ilike(customers.email, pattern),
-            ilike(customers.phoneDigits, pattern),
-          ),
-        ),
-      )
+      .where(and(eq(customers.shopId, shopId), or(...conditions)))
       .limit(20);
     return rows as Customer[];
   }

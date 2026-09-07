@@ -21,6 +21,9 @@ export const jobStatuses = [
 
 export type JobStatus = (typeof jobStatuses)[number];
 
+export const serviceModes = ["shop", "dealer_site", "mobile"] as const;
+export type ServiceMode = (typeof serviceModes)[number];
+
 const jobInputSchema = z.object({
   shopId: z.uuid(),
   jobNumber: z.string().trim().min(1).max(40),
@@ -31,6 +34,11 @@ const jobInputSchema = z.object({
   lotNumber: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.string().trim().max(40).optional(),
+  ),
+  serviceMode: z.enum(serviceModes).default("shop"),
+  serviceLocation: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().max(240).optional(),
   ),
   assignedTechnicianId: z.uuid().optional(),
   createdBy: z.uuid().optional(),
@@ -48,6 +56,8 @@ export interface Job {
   complaint: string;
   mileageAtCheckIn?: number;
   lotNumber?: string;
+  serviceMode: ServiceMode;
+  serviceLocation?: string;
   assignedTechnicianId?: string;
   checkedInAt: Date;
   createdBy?: string;

@@ -35,29 +35,21 @@ first owner-visible/previewable surface. See `docs/decisions/0005-multi-tenant-c
 
 ## Phase 2 — Fast check-in
 
-- [x] Mobile-first check-in screen (`/check-in`) — visual preview only, see note below
-- [x] Returning-customer autocomplete — client-side search over illustrative data, not real records yet
+- [x] Mobile-first check-in screen (`/check-in`) — saves complete live records
+- [x] Returning-customer autocomplete — real shop-scoped partial name/phone search
 - [x] Dealer rapid check-in workflow — mode toggle changes fields (account name, PO/RO #, drops email)
 - [x] VIN manual entry and validation — reuses the exact VIN regex from `src/vehicles/model.ts`
 - [x] VIN camera/photo capture abstraction — disabled "Scan VIN" button, matches the Phase 0 pattern
 - [x] Natural-language complaint capture — free-text field, no AI processing yet (Phase 4)
-- [x] Optional technician assignment at intake — illustrative technician list, not from a real staff table
-- [x] Duplicate customer/vehicle detection — illustrative confirmation banner when a VIN matches mock data
-- [ ] Create complete Job in one fast flow — blocked on a real session; see below
+- [x] Optional technician assignment at intake — active technician accounts from the staff table
+- [x] Duplicate customer/vehicle detection — live VIN/customer ownership check with a server-side backstop
+- [x] Shop / dealership-site / mobile work location captured at intake
+- [x] Create complete Job in one fast flow — transactional customer, vehicle, and job save
 
-**Preview-only by design:** no sign-in provider is configured yet (`docs/decisions/0003-managed-authentication-boundary.md`),
-and the app fails closed rather than trust a client-asserted identity. The owner chose to build this screen's
-look, layout, and interactions now and wire it to real data later, rather than add any authentication
-workaround. As a result the "Start check-in" button stays disabled and no data typed into this screen is
-saved — see `docs/decisions/0003-managed-authentication-boundary.md` addendum. Once a provider is chosen,
-the screen should call the already-built `createCustomerRecord` / `createVehicleRecord` / `createJobRecord`
-services (Phase 1) with a real `Session`, replacing the mock customer/technician data and enabling the
-submit action.
-
-**2026-08-28 update:** the owner selected closed-shop username/password accounts and the database-backed
-credentials/session adapter is now implemented (ADR 0007), including the login page and staff bootstrap
-for Turner, Arthur, Tuan, Brennan, Ryan, Jared, and Chase. The remaining unchecked Phase 2 item is no
-longer blocked on identity; the next milestone is wiring this screen to the real services and database.
+**2026-08-28 completion:** the credential/session adapter from ADR 0007 now protects live check-in APIs.
+The screen searches real customers and VINs, loads the active technician roster, and saves the customer,
+vehicle, and permanent Job in one database transaction. Dealer rapid entry retains the chosen account for
+the next vehicle. Work is classified as shop, dealership-site, or mobile at intake. See ADR 0008.
 
 ## Phase 3 — Diagnostic platform
 
@@ -308,7 +300,7 @@ for what is deferred to the owner and why.
 - [ ] Validate mobile usage with one-handed technician flows
 - [ ] Simplify dashboard
 - [ ] Verify Create Quote remains immediately discoverable
-- [ ] Improve partial-name/customer autocomplete
+- [x] Improve partial-name/customer autocomplete
 - [ ] Review all screens for unnecessary administrative input
 
 ## First safe backlog item

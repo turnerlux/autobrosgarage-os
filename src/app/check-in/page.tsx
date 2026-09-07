@@ -1,116 +1,301 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { vinPattern } from "@/vehicles/model";
 
 type CheckInMode = "standard" | "dealer";
+type ServiceMode = "shop" | "dealer_site" | "mobile";
 
-interface MockCustomer {
+interface CustomerOption {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   email?: string;
-  vehicleVin?: string;
-  vehicleSummary?: string;
+  address?: string;
+  isDealer: boolean;
 }
 
-/**
- * Illustrative data only. This screen is a visual preview (see docs/decisions/0003 and the Phase 2
- * addendum) and does not yet call the real search/create services built in Phase 1
- * (`src/customers`, `src/vehicles`, `src/jobs`). Replace with `universalSearch` and the
- * `create*Record` services once a session can be resolved for check-in staff.
- */
-const MOCK_CUSTOMERS: MockCustomer[] = [
-  {
-    id: "mock-1",
-    name: "Jordan Reyes",
-    phone: "2255551234",
-    email: "jordan.reyes@example.com",
-    vehicleVin: "1FTFW1ET1EFA10234",
-    vehicleSummary: "2021 Ford F-150",
-  },
-  {
-    id: "mock-2",
-    name: "Priya Nair",
-    phone: "2255557890",
-    email: "priya.nair@example.com",
-    vehicleVin: "5YJ3E1EA7KF317000",
-    vehicleSummary: "2019 Tesla Model 3",
-  },
-  {
-    id: "mock-3",
-    name: "Baton Rouge Fleet Services",
-    phone: "2255552255",
-    vehicleSummary: "Fleet account — multiple vehicles on file",
-  },
-];
+interface VehicleOption {
+  id: string;
+  customerId?: string;
+  customerName?: string;
+  customer?: CustomerOption;
+  vin?: string;
+  year?: number;
+  make?: string;
+  model?: string;
+  mileage?: number;
+  licensePlate?: string;
+}
 
-const MOCK_TECHNICIANS = ["Unassigned", "Marcus T.", "Dana W.", "Chris O."];
+interface TechnicianOption {
+  id: string;
+  name: string;
+}
 
-function formatPhone(digits: string): string {
-  const clean = digits.replace(/\D/g, "");
-  if (clean.length !== 10) return digits;
+interface OptionsResponse {
+  customers?: CustomerOption[];
+  vehicles?: VehicleOption[];
+  technicians?: TechnicianOption[];
+  error?: string;
+}
+
+interface CreatedCheckIn {
+  job: { id: string; jobNumber: string; status: string };
+  customer: { id: string; name: string };
+  vehicle: { id: string; vin?: string; year?: number; make?: string; model?: string };
+}
+
+interface CheckInErrorResponse {
+  error?: string;
+  kind?: string;
+  candidates?: CustomerOption[];
+}
+
+function formatPhone(value?: string): string {
+  if (!value) return "No phone saved";
+  const clean = value.replace(/\D/g, "");
+  if (clean.length !== 10) return value;
   return `(${clean.slice(0, 3)}) ${clean.slice(3, 6)}-${clean.slice(6)}`;
+}
+
+function optionalNumber(value: string): number | undefined {
+  if (!value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 export default function CheckInPage() {
   const [mode, setMode] = useState<CheckInMode>("standard");
   const [customerQuery, setCustomerQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<MockCustomer | null>(null);
-  const [newCustomerName, setNewCustomerName] = useState("");
-  const [newCustomerPhone, setNewCustomerPhone] = useState("");
-  const [newCustomerEmail, setNewCustomerEmail] = useState("");
-  const [purchaseOrder, setPurchaseOrder] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption | null>(null);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [vin, setVin] = useState("");
   const [year, setYear] = useState("");
   const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
   const [mileage, setMileage] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [complaint, setComplaint] = useState("");
-  const [technician, setTechnician] = useState(MOCK_TECHNICIANS[0]);
-  const [duplicateDismissed, setDuplicateDismissed] = useState(false);
-
-  const matches = useMemo(() => {
-    const query = customerQuery.trim().toLowerCase();
-    if (!query || selectedCustomer) return [];
-    return MOCK_CUSTOMERS.filter(
-      (customer) => customer.name.toLowerCase().includes(query) || customer.phone.includes(query),
-    );
-  }, [customerQuery, selectedCustomer]);
+  const [lotNumber, setLotNumber] = useState("");
+  const [serviceMode, setServiceMode] = useState<ServiceMode>("shop");
+  const [serviceLocation, setServiceLocation] = useState("");
+  const [technicianId, setTechnicianId] = useState("");
+  const [customerMatches, setCustomerMatches] = useState<CustomerOption[]>([]);
+  const [vehicleMatches, setVehicleMatches] = useState<VehicleOption[]>([]);
+  const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [created, setCreated] = useState<CreatedCheckIn | null>(null);
+  const [confirmDuplicate, setConfirmDuplicate] = useState(false);
+  const [duplicateCandidates, setDuplicateCandidates] = useState<CustomerOption[]>([]);
 
   const vinValue = vin.trim().toUpperCase();
   const vinError =
     vinValue.length > 0 && !vinPattern.test(vinValue)
       ? "Must be 17 characters (VINs never use I, O, or Q)."
       : null;
+  const lookupQuery = vinValue.length >= 6 ? vinValue : customerQuery.trim();
 
-  const duplicateMatch = useMemo(() => {
-    if (duplicateDismissed || vinError || vinValue.length !== 17) return null;
-    const byVin = MOCK_CUSTOMERS.find((customer) => customer.vehicleVin === vinValue);
-    return byVin && byVin.id !== selectedCustomer?.id ? byVin : null;
-  }, [vinValue, vinError, duplicateDismissed, selectedCustomer]);
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(
+      async () => {
+        setLoadingOptions(true);
+        try {
+          const response = await fetch(
+            `/api/check-in/options?q=${encodeURIComponent(lookupQuery)}`,
+            {
+              signal: controller.signal,
+            },
+          );
+          const result = (await response.json()) as OptionsResponse;
+          if (!response.ok) {
+            setError(result.error ?? "Unable to load shop records.");
+            return;
+          }
+          setTechnicians(result.technicians ?? []);
+          setCustomerMatches(result.customers ?? []);
+          setVehicleMatches(result.vehicles ?? []);
+        } catch (cause) {
+          if ((cause as Error).name !== "AbortError") {
+            setError("Unable to reach Auto Bros OS. Try again.");
+          }
+        } finally {
+          if (!controller.signal.aborted) setLoadingOptions(false);
+        }
+      },
+      lookupQuery ? 220 : 0,
+    );
 
-  function selectCustomer(customer: MockCustomer) {
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [lookupQuery]);
+
+  const visibleCustomers = useMemo(
+    () =>
+      customerMatches.filter(
+        (customer) => !selectedCustomer && (mode === "standard" || customer.isDealer),
+      ),
+    [customerMatches, mode, selectedCustomer],
+  );
+  const exactVehicle = useMemo(
+    () => vehicleMatches.find((vehicle) => vehicle.vin === vinValue),
+    [vehicleMatches, vinValue],
+  );
+
+  function selectCustomer(customer: CustomerOption) {
     setSelectedCustomer(customer);
     setCustomerQuery(customer.name);
-    setDuplicateDismissed(true);
+    setCustomerPhone(customer.phone ?? "");
+    setCustomerEmail(customer.email ?? "");
+    setCustomerAddress(customer.address ?? "");
+    setConfirmDuplicate(false);
+    setDuplicateCandidates([]);
+    if (mode === "dealer") {
+      setServiceMode("dealer_site");
+      setServiceLocation(customer.name);
+    }
+    setError("");
   }
 
   function clearCustomer() {
     setSelectedCustomer(null);
     setCustomerQuery("");
-    setNewCustomerName("");
-    setNewCustomerPhone("");
-    setNewCustomerEmail("");
-    setDuplicateDismissed(false);
+    setCustomerPhone("");
+    setCustomerEmail("");
+    setCustomerAddress("");
+    setConfirmDuplicate(false);
+    setDuplicateCandidates([]);
   }
 
   function changeMode(next: CheckInMode) {
     setMode(next);
     clearCustomer();
+    setServiceMode(next === "dealer" ? "dealer_site" : "shop");
+    setServiceLocation("");
+  }
+
+  function resetVehicleForNext() {
+    setVin("");
+    setYear("");
+    setMake("");
+    setVehicleModel("");
+    setMileage("");
+    setLicensePlate("");
+    setComplaint("");
+    setLotNumber("");
+    setTechnicianId("");
+    setCreated(null);
+    setError("");
+    setConfirmDuplicate(false);
+    setDuplicateCandidates([]);
+  }
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/check-in", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          existingCustomerId: selectedCustomer?.id,
+          customer: selectedCustomer
+            ? undefined
+            : {
+                displayName: customerQuery,
+                phone: customerPhone,
+                email: mode === "standard" ? customerEmail : undefined,
+                address: customerAddress,
+                isDealer: mode === "dealer",
+                confirmDuplicate,
+              },
+          vehicle: {
+            vin: vinValue,
+            year: optionalNumber(year),
+            make,
+            model: vehicleModel,
+            mileage: optionalNumber(mileage),
+            licensePlate,
+          },
+          job: {
+            complaint,
+            lotNumber,
+            serviceMode,
+            serviceLocation,
+            assignedTechnicianId: technicianId || undefined,
+          },
+        }),
+      });
+      const result = (await response.json()) as CreatedCheckIn & CheckInErrorResponse;
+      if (!response.ok) {
+        setError(result.error ?? "Unable to save this check-in.");
+        if (result.kind === "customer_duplicate") {
+          setDuplicateCandidates(result.candidates ?? []);
+        }
+        return;
+      }
+      setCreated(result);
+    } catch {
+      setError("Unable to reach Auto Bros OS. Nothing was saved—try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (created) {
+    const vehicleSummary =
+      [created.vehicle.year, created.vehicle.make, created.vehicle.model]
+        .filter(Boolean)
+        .join(" ") ||
+      created.vehicle.vin ||
+      "Vehicle";
+    return (
+      <main className="app-shell checkin-shell">
+        <header className="topbar">
+          <Link className="brand" href="/" aria-label="Auto Bros OS home">
+            <span className="brand-mark" aria-hidden="true">
+              AB
+            </span>
+            <span>
+              <strong>Auto Bros</strong>
+              <small>Garage OS</small>
+            </span>
+          </Link>
+          <span className="environment-badge live">Saved</span>
+        </header>
+        <section className="workspace checkin-workspace">
+          <section className="checkin-success" role="status">
+            <div className="eyebrow">Check-in complete</div>
+            <h1>{created.job.jobNumber}</h1>
+            <p>
+              <strong>{created.customer.name}</strong> · {vehicleSummary}
+            </p>
+            <p>The customer, vehicle, and job are saved together in Auto Bros OS.</p>
+            <div className="checkin-success-actions">
+              <button className="quote-button" type="button" onClick={resetVehicleForNext}>
+                {mode === "dealer"
+                  ? `Check in another for ${created.customer.name}`
+                  : "Start another check-in"}
+              </button>
+              <Link className="ghost-button link-button" href="/">
+                Back to dashboard
+              </Link>
+            </div>
+          </section>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -125,15 +310,15 @@ export default function CheckInPage() {
             <small>Garage OS</small>
           </span>
         </Link>
-        <span className="environment-badge">Preview — not saved</span>
+        <span className="environment-badge live">Live records</span>
       </header>
 
-      <section className="workspace checkin-workspace">
+      <form className="workspace checkin-workspace" onSubmit={submit}>
         <div className="eyebrow">Fast check-in</div>
         <h1>Get a vehicle checked in fast.</h1>
         <p className="intro">
-          Search for a returning customer, capture the vehicle, and describe what they need — built
-          for the service drive, on a phone.
+          Pick a saved customer or enter a new one, identify the vehicle, and record the diagnostic
+          or complaint.
         </p>
 
         <fieldset className="mode-toggle">
@@ -147,7 +332,7 @@ export default function CheckInPage() {
                 checked={mode === option}
                 onChange={() => changeMode(option)}
               />
-              {option === "standard" ? "Standard check-in" : "Dealer rapid check-in"}
+              {option === "standard" ? "Customer" : "Dealer / fleet"}
             </label>
           ))}
         </fieldset>
@@ -157,11 +342,10 @@ export default function CheckInPage() {
             <h2 id="customer-heading">{mode === "dealer" ? "Dealer account" : "Customer"}</h2>
             {selectedCustomer ? (
               <button type="button" className="ghost-button" onClick={clearCustomer}>
-                Change {mode === "dealer" ? "account" : "customer"}
+                Change
               </button>
             ) : null}
           </div>
-
           {selectedCustomer ? (
             <div className="checkin-selected-customer">
               <p className="checkin-selected-name">{selectedCustomer.name}</p>
@@ -169,34 +353,36 @@ export default function CheckInPage() {
                 {formatPhone(selectedCustomer.phone)}
                 {selectedCustomer.email ? ` · ${selectedCustomer.email}` : ""}
               </p>
-              {selectedCustomer.vehicleSummary ? (
-                <p className="checkin-selected-detail">
-                  On file: {selectedCustomer.vehicleSummary}
-                </p>
+              {selectedCustomer.address ? (
+                <p className="checkin-selected-detail">{selectedCustomer.address}</p>
               ) : null}
             </div>
           ) : (
             <>
               <label htmlFor="customer-search">
                 {mode === "dealer"
-                  ? "Search dealer or fleet accounts"
-                  : "Search returning customers by name or phone"}
+                  ? "Search or enter dealer name"
+                  : "Search or enter customer name"}
               </label>
               <input
                 id="customer-search"
                 type="text"
                 value={customerQuery}
-                onChange={(event) => setCustomerQuery(event.target.value)}
-                placeholder={
-                  mode === "dealer"
-                    ? "e.g. Baton Rouge Fleet Services"
-                    : "e.g. Jordan Reyes or 225-555-1234"
-                }
+                onChange={(event) => {
+                  setCustomerQuery(event.target.value);
+                  setConfirmDuplicate(false);
+                  setDuplicateCandidates([]);
+                }}
+                placeholder={mode === "dealer" ? "Port City" : "Name or phone number"}
                 autoComplete="off"
+                required
               />
-              {matches.length > 0 ? (
+              {loadingOptions && customerQuery ? (
+                <p className="checkin-hint">Searching saved customers…</p>
+              ) : null}
+              {visibleCustomers.length > 0 ? (
                 <ul className="checkin-suggestions" aria-label="Matching customers">
-                  {matches.map((customer) => (
+                  {visibleCustomers.map((customer) => (
                     <li key={customer.id}>
                       <button type="button" onClick={() => selectCustomer(customer)}>
                         <span>{customer.name}</span>
@@ -208,34 +394,20 @@ export default function CheckInPage() {
                   ))}
                 </ul>
               ) : null}
-              {customerQuery.trim() && matches.length === 0 ? (
+              {customerQuery.trim() && !loadingOptions && visibleCustomers.length === 0 ? (
                 <p className="checkin-hint">
-                  No match — this will be a new {mode === "dealer" ? "account" : "customer"}.
+                  No saved match—this will create a new{" "}
+                  {mode === "dealer" ? "dealer account" : "customer"}.
                 </p>
               ) : null}
-
               <div className="checkin-grid">
-                <div>
-                  <label htmlFor="customer-name">
-                    {mode === "dealer" ? "Account name" : "Full name"}
-                  </label>
-                  <input
-                    id="customer-name"
-                    type="text"
-                    value={newCustomerName}
-                    onChange={(event) => setNewCustomerName(event.target.value)}
-                    placeholder={
-                      mode === "dealer" ? "Fleet or dealer account name" : "First and last name"
-                    }
-                  />
-                </div>
                 <div>
                   <label htmlFor="customer-phone">Phone</label>
                   <input
                     id="customer-phone"
                     type="tel"
-                    value={newCustomerPhone}
-                    onChange={(event) => setNewCustomerPhone(event.target.value)}
+                    value={customerPhone}
+                    onChange={(event) => setCustomerPhone(event.target.value)}
                     placeholder="(225) 555-0100"
                   />
                 </div>
@@ -245,48 +417,39 @@ export default function CheckInPage() {
                     <input
                       id="customer-email"
                       type="email"
-                      value={newCustomerEmail}
-                      onChange={(event) => setNewCustomerEmail(event.target.value)}
+                      value={customerEmail}
+                      onChange={(event) => setCustomerEmail(event.target.value)}
                       placeholder="name@example.com"
                     />
                   </div>
-                ) : (
-                  <div>
-                    <label htmlFor="purchase-order">Purchase order / RO # (optional)</label>
-                    <input
-                      id="purchase-order"
-                      type="text"
-                      value={purchaseOrder}
-                      onChange={(event) => setPurchaseOrder(event.target.value)}
-                      placeholder="Optional"
-                    />
-                  </div>
-                )}
+                ) : null}
+                <div>
+                  <label htmlFor="customer-address">Address (optional)</label>
+                  <input
+                    id="customer-address"
+                    type="text"
+                    value={customerAddress}
+                    onChange={(event) => setCustomerAddress(event.target.value)}
+                    placeholder="Street, city, state, ZIP"
+                  />
+                </div>
               </div>
             </>
           )}
         </section>
 
-        {duplicateMatch ? (
+        {exactVehicle?.customer && exactVehicle.customer.id !== selectedCustomer?.id ? (
           <div className="checkin-duplicate" role="alert">
             <div>
-              <h2>Possible match found</h2>
+              <h2>VIN already on file</h2>
               <p>
-                This VIN is already on file for <strong>{duplicateMatch.name}</strong>
-                {duplicateMatch.vehicleSummary ? ` (${duplicateMatch.vehicleSummary})` : ""}. Is
-                this the same {mode === "dealer" ? "account" : "customer"}?
+                This vehicle is saved under <strong>{exactVehicle.customer.name}</strong>. Use that
+                record to keep its service history together.
               </p>
             </div>
             <div className="checkin-duplicate-actions">
-              <button type="button" onClick={() => selectCustomer(duplicateMatch)}>
-                Yes, use this record
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={() => setDuplicateDismissed(true)}
-              >
-                No, different {mode === "dealer" ? "account" : "customer"}
+              <button type="button" onClick={() => selectCustomer(exactVehicle.customer!)}>
+                Use {exactVehicle.customer.name}
               </button>
             </div>
           </div>
@@ -296,7 +459,6 @@ export default function CheckInPage() {
           <div className="checkin-section-head">
             <h2 id="vehicle-heading">Vehicle</h2>
           </div>
-
           <div className="checkin-vin-row">
             <div className="checkin-vin-field">
               <label htmlFor="vin">VIN</label>
@@ -305,7 +467,7 @@ export default function CheckInPage() {
                 type="text"
                 value={vin}
                 maxLength={17}
-                onChange={(event) => setVin(event.target.value)}
+                onChange={(event) => setVin(event.target.value.toUpperCase())}
                 placeholder="17-character VIN"
                 aria-invalid={vinError ? "true" : "false"}
                 aria-describedby={vinError ? "vin-error" : undefined}
@@ -320,13 +482,12 @@ export default function CheckInPage() {
               type="button"
               className="ghost-button"
               disabled
-              title="Camera VIN capture is not built yet"
+              title="Camera VIN capture is coming next"
               aria-label="Scan VIN with camera"
             >
               Scan VIN
             </button>
           </div>
-
           <div className="checkin-grid">
             <div>
               <label htmlFor="year">Year</label>
@@ -354,8 +515,8 @@ export default function CheckInPage() {
               <input
                 id="model"
                 type="text"
-                value={model}
-                onChange={(event) => setModel(event.target.value)}
+                value={vehicleModel}
+                onChange={(event) => setVehicleModel(event.target.value)}
                 placeholder="F-150"
               />
             </div>
@@ -383,15 +544,69 @@ export default function CheckInPage() {
           </div>
         </section>
 
+        <section className="checkin-section" aria-labelledby="location-heading">
+          <h2 id="location-heading">Where is the work?</h2>
+          <fieldset className="mode-toggle compact-toggle">
+            <legend>Work location</legend>
+            {(["shop", "dealer_site", "mobile"] as const).map((option) => (
+              <label
+                key={option}
+                className={`mode-option${serviceMode === option ? " selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="service-mode"
+                  value={option}
+                  checked={serviceMode === option}
+                  onChange={() => setServiceMode(option)}
+                />
+                {option === "shop"
+                  ? "At our shop"
+                  : option === "dealer_site"
+                    ? "At dealership"
+                    : "Mobile job"}
+              </label>
+            ))}
+          </fieldset>
+          {serviceMode !== "shop" ? (
+            <div>
+              <label htmlFor="service-location">
+                {serviceMode === "mobile" ? "Mobile service address" : "Dealership / location"}
+              </label>
+              <input
+                id="service-location"
+                type="text"
+                value={serviceLocation}
+                onChange={(event) => setServiceLocation(event.target.value)}
+                placeholder={serviceMode === "mobile" ? "Customer address" : "Port City Auto Sales"}
+                required
+              />
+            </div>
+          ) : null}
+          {mode === "dealer" ? (
+            <div>
+              <label htmlFor="lot-number">Lot / PO / RO number (optional)</label>
+              <input
+                id="lot-number"
+                type="text"
+                value={lotNumber}
+                onChange={(event) => setLotNumber(event.target.value)}
+                placeholder="Lot 141"
+              />
+            </div>
+          ) : null}
+        </section>
+
         <section className="checkin-section" aria-labelledby="complaint-heading">
-          <h2 id="complaint-heading">What&apos;s going on?</h2>
-          <label htmlFor="complaint">Customer complaint or requested work</label>
+          <h2 id="complaint-heading">Diagnostic / complaint</h2>
+          <label htmlFor="complaint">What needs to be checked or repaired?</label>
           <textarea
             id="complaint"
-            rows={3}
+            rows={4}
             value={complaint}
             onChange={(event) => setComplaint(event.target.value)}
-            placeholder="e.g. Check engine light on, feels rough at idle, needs an oil change"
+            placeholder="Customer states…, needs diagnosis…, or requested work…"
+            required
           />
         </section>
 
@@ -400,42 +615,52 @@ export default function CheckInPage() {
           <label htmlFor="technician">Assign technician</label>
           <select
             id="technician"
-            value={technician}
-            onChange={(event) => setTechnician(event.target.value)}
+            value={technicianId}
+            onChange={(event) => setTechnicianId(event.target.value)}
           >
-            {MOCK_TECHNICIANS.map((name) => (
-              <option key={name} value={name}>
-                {name}
+            <option value="">Unassigned</option>
+            {technicians.map((technician) => (
+              <option key={technician.id} value={technician.id}>
+                {technician.name}
               </option>
             ))}
           </select>
-          <p className="checkin-hint">Preview list — not yet connected to real staff records.</p>
         </section>
 
+        {duplicateCandidates.length > 0 ? (
+          <div className="checkin-duplicate" role="alert">
+            <div>
+              <h2>Possible customer duplicate</h2>
+              <p>
+                {duplicateCandidates.map((candidate) => candidate.name).join(", ")} already looks
+                similar. Select the saved match above when it is the same customer.
+              </p>
+            </div>
+            <div className="checkin-duplicate-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDuplicate(true);
+                  setDuplicateCandidates([]);
+                  setError("");
+                }}
+              >
+                Create a separate customer anyway
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {error ? (
+          <p className="checkin-form-error" role="alert">
+            {error}
+          </p>
+        ) : null}
         <div className="checkin-submit-row">
-          <button
-            type="button"
-            className="quote-button"
-            disabled
-            title="Available once sign-in is connected"
-          >
-            Start check-in
+          <button type="submit" className="quote-button" disabled={submitting || Boolean(vinError)}>
+            {submitting ? "Saving check-in…" : "Save & start job"}
           </button>
         </div>
-
-        <section className="foundation-note">
-          <span className="status-dot" aria-hidden="true" />
-          <div>
-            <h2>Preview only — nothing is saved</h2>
-            <p>
-              This screen shows the intended fast check-in flow. Customer search results, the
-              duplicate match above, and the technician list are illustrative, not real shop data.
-              It will connect to the real customer, vehicle, and job records already built in Phase
-              1 once a sign-in provider is chosen.
-            </p>
-          </div>
-        </section>
-      </section>
+      </form>
     </main>
   );
 }

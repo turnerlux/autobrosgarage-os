@@ -9,7 +9,14 @@ import type { UserStore } from "../users/store";
 import type { VehicleStore } from "../vehicles/store";
 
 import { generateJobNumber, type JobNumberCounterStore } from "./job-number";
-import { applyJobStatus, assignJobTechnician, createJob, type Job, type JobStatus } from "./model";
+import {
+  applyJobStatus,
+  assignJobTechnician,
+  createJob,
+  type Job,
+  type JobStatus,
+  type ServiceMode,
+} from "./model";
 import type { JobStore } from "./store";
 
 export interface JobStores {
@@ -28,6 +35,8 @@ export interface CreateJobInput {
   complaint: string;
   mileageAtCheckIn?: number;
   lotNumber?: string;
+  serviceMode?: ServiceMode;
+  serviceLocation?: string;
   assignedTechnicianId?: string;
 }
 
@@ -74,6 +83,8 @@ export async function createJobRecord(
     complaint: input.complaint,
     mileageAtCheckIn: input.mileageAtCheckIn,
     lotNumber: input.lotNumber,
+    serviceMode: input.serviceMode,
+    serviceLocation: input.serviceLocation,
     assignedTechnicianId: input.assignedTechnicianId,
     createdBy: session.user.id,
   });

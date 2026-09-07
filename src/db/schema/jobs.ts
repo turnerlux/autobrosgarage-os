@@ -25,6 +25,8 @@ export const jobs = appSchema.table(
     complaint: text("complaint").notNull(),
     mileageAtCheckIn: integer("mileage_at_check_in"),
     lotNumber: text("lot_number"),
+    serviceMode: text("service_mode").notNull().default("shop"),
+    serviceLocation: text("service_location"),
     assignedTechnicianId: uuid("assigned_technician_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -39,6 +41,7 @@ export const jobs = appSchema.table(
     index("jobs_shop_customer_idx").on(table.shopId, table.customerId),
     index("jobs_shop_vehicle_idx").on(table.shopId, table.vehicleId),
     index("jobs_shop_lot_idx").on(table.shopId, table.lotNumber),
+    index("jobs_shop_service_mode_idx").on(table.shopId, table.serviceMode),
     index("jobs_shop_technician_idx").on(table.shopId, table.assignedTechnicianId),
   ],
 );
