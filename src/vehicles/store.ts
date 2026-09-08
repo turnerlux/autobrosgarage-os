@@ -1,4 +1,4 @@
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "drizzle-orm";
 
 import type { Database } from "../db/client";
 import { vehicles } from "../db/schema";
@@ -12,6 +12,8 @@ export interface VehicleStore {
   update(shopId: string, id: string, vehicle: Vehicle): Promise<void>;
   /** Partial, case-insensitive search across VIN/year/make/model/plate for universal search. */
   search(shopId: string, queryText: string): Promise<Vehicle[]>;
+  /** Every vehicle on file for one customer, newest first -- the returning-customer picker. */
+  listByCustomer(shopId: string, customerId: string): Promise<Vehicle[]>;
 }
 
 export class InMemoryVehicleStore implements VehicleStore {
@@ -58,6 +60,13 @@ export class InMemoryVehicleStore implements VehicleStore {
         .toLowerCase();
       return haystack.includes(needle);
     });
+  }
+
+  async listByCustomer(shopId: string, customerId: string): Promise<Vehicle[]> {
+    return [...this.vehiclesById.values()]
+      .filter((vehicle) => vehicle.shopId === shopId && vehicle.customerId === customerId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((vehicle) => structuredClone(vehicle));
   }
 }
 
@@ -111,6 +120,15 @@ export class DatabaseVehicleStore implements VehicleStore {
         ),
       )
       .limit(20);
+    return rows as Vehicle[];
+  }
+
+  async listByCustomer(shopId: string, customerId: string): Promise<Vehicle[]> {
+    const rows = await this.database
+      .select()
+      .from(vehicles)
+      .where(and(eq(vehicles.shopId, shopId), eq(vehicles.customerId, customerId)))
+      .orderBy(desc(vehicles.createdAt));
     return rows as Vehicle[];
   }
 }

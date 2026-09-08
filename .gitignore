@@ -27,3 +27,6 @@ pnpm-debug.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local staff roster: never commit real usernames, names, or roles
+scripts/staff.json

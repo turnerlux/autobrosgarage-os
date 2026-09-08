@@ -18,6 +18,7 @@ import {
   assignTechnician,
   createJobRecord,
   getVehicleServiceHistory,
+  listShopJobs,
   updateJobStatus,
 } from "./service";
 import { InMemoryJobStore } from "./store";
@@ -181,5 +182,62 @@ describe("job service", () => {
     await expect(getVehicleServiceHistory(session, stores, otherVehicle.id)).rejects.toThrow(
       ApplicationError,
     );
+  });
+
+  it("lists the shop's jobs newest first for the job board", async () => {
+    const { session, customer, vehicle, stores } = await buildFixture();
+
+    const first = await createJobRecord(session, stores, {
+      customerId: customer.id,
+      vehicleId: vehicle.id,
+      complaint: "Won't start",
+    });
+    const second = await createJobRecord(session, stores, {
+      customerId: customer.id,
+      vehicleId: vehicle.id,
+      complaint: "Grinding on braking",
+    });
+
+    // Both jobs land in the same millisecond, so give them real check-in times to order by.
+    await stores.jobs.update(session.user.shopId, first.id, {
+      ...first,
+      checkedInAt: new Date("2026-02-03T08:00:00Z"),
+    });
+    await stores.jobs.update(session.user.shopId, second.id, {
+      ...second,
+      checkedInAt: new Date("2026-02-04T08:00:00Z"),
+    });
+
+    const board = await listShopJobs(session, stores);
+
+    expect(board.map((job) => job.id)).toEqual([second.id, first.id]);
+  });
+
+  it("never returns another shop's jobs on the board", async () => {
+    const { session, customer, vehicle, stores } = await buildFixture();
+    await createJobRecord(session, stores, {
+      customerId: customer.id,
+      vehicleId: vehicle.id,
+      complaint: "Won't start",
+    });
+
+    const intruder = testSession("service_advisor", {
+      shopId: "7c2f9b41-3d1e-4f2a-9c88-1a2b3c4d5e6f",
+    });
+
+    await expect(listShopJobs(intruder, stores)).resolves.toEqual([]);
+  });
+
+  it("caps the job board even when a larger limit is requested", async () => {
+    const { session, stores } = await buildFixture();
+
+    await expect(listShopJobs(session, stores, 5_000)).resolves.toEqual([]);
+  });
+
+  it("denies job board access without jobs:read", async () => {
+    const { stores } = await buildFixture();
+    const bookkeeper = testSession("bookkeeper", { shopId: "any-shop" });
+
+    await expect(listShopJobs(bookkeeper, stores)).rejects.toThrow(PermissionDeniedError);
   });
 });

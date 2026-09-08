@@ -142,6 +142,22 @@ export async function getVehicleServiceHistory(
   return stores.jobs.listByVehicle(shopId, vehicleId);
 }
 
+/** Upper bound on one job-board page, so a large shop cannot pull its whole history at once. */
+export const jobBoardLimit = 100;
+
+/**
+ * The shop's jobs, newest check-in first -- what the job board reads. Scoped to the caller's
+ * own shop by `session.user.shopId`, so there is no id a caller could pass to widen it.
+ */
+export async function listShopJobs(
+  session: Session,
+  stores: { jobs: JobStore },
+  limit = jobBoardLimit,
+): Promise<Job[]> {
+  requirePermission(session, "jobs:read");
+  return stores.jobs.listRecent(session.user.shopId, Math.min(limit, jobBoardLimit));
+}
+
 export async function updateJobStatus(
   session: Session,
   stores: { jobs: JobStore; audit: AuditStore },

@@ -8,6 +8,7 @@ const workflowCards = [
 const navigation = ["AI", "Jobs", "Customers", "Diagnostics", "Money", "More"];
 const navigationHrefs: Record<string, string> = {
   AI: "/ai",
+  Jobs: "/jobs",
   Diagnostics: "/diagnostics",
 };
 
@@ -40,14 +41,23 @@ export default function Home() {
               source records, and surface only the decisions that need a person.
             </p>
           </div>
-          <button
-            className="quote-button"
-            type="button"
-            disabled
-            title="Available after core records are implemented"
-          >
-            <span aria-hidden="true">+</span> Create quote
-          </button>
+          <div className="hero-actions">
+            <a className="quote-button" href="/check-in">
+              <span aria-hidden="true">+</span> Check in a vehicle
+            </a>
+            <a className="ghost-button" href="/jobs">
+              Job board
+            </a>
+            {/* Kept prominent per master spec §16; enabled when Phase 6 estimates land. */}
+            <button
+              className="ghost-button"
+              type="button"
+              disabled
+              title="Available after estimates are implemented"
+            >
+              Create quote
+            </button>
+          </div>
         </div>
 
         <form className="command-bar" aria-label="Auto Bros AI command" action="#">
