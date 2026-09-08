@@ -194,6 +194,12 @@ for what is deferred to the owner and why.
 
 ## Phase 8 — Repair workflow
 
+**Brought forward (ADR 0009):** a read-only job board now exists at `/jobs` — every job in the
+shop, newest first, searchable by job number, customer, vehicle, plate, or complaint, defaulting
+to open work. Until this landed the application was write-only: a job could be checked in and
+then never seen again from inside the app. Status _changes_ from the board are still Phase 8;
+`updateJobStatus` and its transition rules already exist and are tested.
+
 - [ ] Status automation and manual override
 - [ ] Waiting-on-parts tracking
 - [ ] Parts received status
@@ -279,6 +285,18 @@ for what is deferred to the owner and why.
 
 ## Phase 15 — Security hardening
 
+**Partially addressed (ADR 0009):** the staff roster is no longer committed. It moved from a
+hard-coded array in `scripts/bootstrap-staff.mjs` to a git-ignored `scripts/staff.json`, so a
+public repository no longer publishes every valid username, each person's privilege level, or
+employees' names. Passwords were never exposed — they are generated at runtime and stored only
+as scrypt hashes.
+
+**Still open, and the most urgent item in this phase:** lockout is per username, so five failed
+attempts lock that account for 15 minutes. Anyone who learns a username can lock real staff out
+of a working shop, repeatedly. Removing the public roster raises the cost of that attack without
+removing it. The fix is per-IP throttling that an unauthenticated attacker cannot use to lock a
+known-good account — tracked under "Rate limiting" below.
+
 - [ ] MFA requirement for privileged roles
 - [ ] Comprehensive role/permission tests
 - [ ] Cross-customer access tests
@@ -301,6 +319,9 @@ for what is deferred to the owner and why.
 - [ ] Simplify dashboard
 - [ ] Verify Create Quote remains immediately discoverable
 - [x] Improve partial-name/customer autocomplete
+- [x] Returning-customer vehicle picker — selecting a saved customer now lists the vehicles
+      already on file for them, so a repeat visit reuses the record instead of re-typing a VIN
+      (`listCustomerVehicles`; see ADR 0009)
 - [ ] Review all screens for unnecessary administrative input
 
 ## First safe backlog item

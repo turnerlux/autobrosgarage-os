@@ -61,6 +61,13 @@ function formatPhone(value?: string): string {
   return `(${clean.slice(0, 3)}) ${clean.slice(3, 6)}-${clean.slice(6)}`;
 }
 
+/** "2019 Toyota Tacoma", falling back to whatever identifying detail the record does have. */
+function describeVehicle(vehicle: VehicleOption): string {
+  const described = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
+  if (described) return described;
+  return vehicle.vin ?? vehicle.licensePlate ?? "Saved vehicle";
+}
+
 function optionalNumber(value: string): number | undefined {
   if (!value.trim()) return undefined;
   const parsed = Number(value);
@@ -94,6 +101,9 @@ export default function CheckInPage() {
   const [created, setCreated] = useState<CreatedCheckIn | null>(null);
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
   const [duplicateCandidates, setDuplicateCandidates] = useState<CustomerOption[]>([]);
+  const [savedVehicles, setSavedVehicles] = useState<VehicleOption[]>([]);
+  const [loadingSavedVehicles, setLoadingSavedVehicles] = useState(false);
+  const [selectedSavedVehicleId, setSelectedSavedVehicleId] = useState("");
 
   const vinValue = vin.trim().toUpperCase();
   const vinError =
@@ -139,6 +149,38 @@ export default function CheckInPage() {
     };
   }, [lookupQuery]);
 
+  /**
+   * Once a returning customer is chosen, load the vehicles already on file for them. This is
+   * the half of the repeat-visit flow the customer search does not cover: the person is found
+   * by name, but their truck still had to be re-typed from the VIN up.
+   */
+  useEffect(() => {
+    // Clearing is handled where the customer is cleared, so this effect never sets state
+    // synchronously -- it only subscribes to a fetch and reports what came back.
+    if (!selectedCustomer) return;
+
+    const controller = new AbortController();
+
+    void (async () => {
+      setLoadingSavedVehicles(true);
+      try {
+        const response = await fetch(
+          `/api/check-in/customer-vehicles?customerId=${encodeURIComponent(selectedCustomer.id)}`,
+          { signal: controller.signal },
+        );
+        const result = (await response.json()) as OptionsResponse;
+        setSavedVehicles(response.ok ? (result.vehicles ?? []) : []);
+      } catch (cause) {
+        // A failed lookup only costs the shortcut -- manual vehicle entry still works.
+        if ((cause as Error).name !== "AbortError") setSavedVehicles([]);
+      } finally {
+        if (!controller.signal.aborted) setLoadingSavedVehicles(false);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [selectedCustomer]);
+
   const visibleCustomers = useMemo(
     () =>
       customerMatches.filter(
@@ -166,8 +208,33 @@ export default function CheckInPage() {
     setError("");
   }
 
+  /** Fills the vehicle fields from a vehicle already on file, so a repeat visit types nothing. */
+  function selectSavedVehicle(vehicle: VehicleOption) {
+    setSelectedSavedVehicleId(vehicle.id);
+    setVin(vehicle.vin ?? "");
+    setYear(vehicle.year ? String(vehicle.year) : "");
+    setMake(vehicle.make ?? "");
+    setVehicleModel(vehicle.model ?? "");
+    setLicensePlate(vehicle.licensePlate ?? "");
+    // Mileage is deliberately left blank: it is the one field that is different every visit.
+    setMileage("");
+    setError("");
+  }
+
+  function clearSavedVehicle() {
+    setSelectedSavedVehicleId("");
+    setVin("");
+    setYear("");
+    setMake("");
+    setVehicleModel("");
+    setLicensePlate("");
+    setMileage("");
+  }
+
   function clearCustomer() {
     setSelectedCustomer(null);
+    setSavedVehicles([]);
+    setSelectedSavedVehicleId("");
     setCustomerQuery("");
     setCustomerPhone("");
     setCustomerEmail("");
@@ -184,6 +251,7 @@ export default function CheckInPage() {
   }
 
   function resetVehicleForNext() {
+    setSelectedSavedVehicleId("");
     setVin("");
     setYear("");
     setMake("");
@@ -458,7 +526,53 @@ export default function CheckInPage() {
         <section className="checkin-section" aria-labelledby="vehicle-heading">
           <div className="checkin-section-head">
             <h2 id="vehicle-heading">Vehicle</h2>
+            {selectedSavedVehicleId ? (
+              <button type="button" className="ghost-button" onClick={clearSavedVehicle}>
+                Different vehicle
+              </button>
+            ) : null}
           </div>
+
+          {selectedCustomer && loadingSavedVehicles ? (
+            <p className="checkin-hint">Looking up vehicles on file…</p>
+          ) : null}
+
+          {selectedCustomer && !loadingSavedVehicles && savedVehicles.length > 0 ? (
+            <div className="checkin-saved-vehicles">
+              <p className="checkin-hint">
+                {savedVehicles.length === 1
+                  ? "1 vehicle on file for this customer. Tap to reuse it."
+                  : `${savedVehicles.length} vehicles on file for this customer. Tap to reuse one.`}
+              </p>
+              <ul className="checkin-suggestions" aria-label="Vehicles on file for this customer">
+                {savedVehicles.map((vehicle) => (
+                  <li key={vehicle.id}>
+                    <button
+                      type="button"
+                      onClick={() => selectSavedVehicle(vehicle)}
+                      aria-pressed={selectedSavedVehicleId === vehicle.id}
+                    >
+                      <span>{describeVehicle(vehicle)}</span>
+                      <span className="checkin-suggestion-detail">
+                        {vehicle.licensePlate
+                          ? `Plate ${vehicle.licensePlate}`
+                          : vehicle.vin
+                            ? `VIN …${vehicle.vin.slice(-6)}`
+                            : "No VIN on file"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {selectedCustomer && !loadingSavedVehicles && savedVehicles.length === 0 ? (
+            <p className="checkin-hint">
+              No vehicles on file for this customer yet—this will be their first.
+            </p>
+          ) : null}
+
           <div className="checkin-vin-row">
             <div className="checkin-vin-field">
               <label htmlFor="vin">VIN</label>

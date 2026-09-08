@@ -19,6 +19,8 @@ const serverEnvironmentSchema = z
     AUTH_SHOP_SLUG: z.string().trim().min(1).default("auto-bros-garage"),
     OBJECT_STORAGE_BUCKET: optional(z.string().min(1)),
     OPENAI_API_KEY: optional(z.string().min(20)),
+    ANTHROPIC_API_KEY: optional(z.string().min(20)),
+    AI_MODEL: optional(z.string().trim().min(1)),
   })
   .superRefine((environment, context) => {
     if (["local", "test"].includes(environment.APP_ENV)) return;

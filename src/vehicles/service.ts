@@ -2,6 +2,7 @@ import { requireSameShop, requirePermission } from "../auth/authorization";
 import type { Session } from "../auth/model";
 import { createAuditEvent } from "../audit/model";
 import type { AuditStore } from "../audit/store";
+import type { CustomerStore } from "../customers/store";
 import { ApplicationError } from "../lib/errors/public-error";
 
 import { applyVehicleUpdate, createVehicle, type Vehicle, type VehicleInput } from "./model";
@@ -62,6 +63,28 @@ export async function getVehicleRecord(
   requireSameShop(session, vehicle.shopId);
 
   return vehicle;
+}
+
+/**
+ * Every vehicle already on file for one customer, newest first. This is the other half of the
+ * returning-customer flow: `universalSearch` finds the person, this finds the cars they have
+ * brought in before, so a repeat visit never re-types a VIN that is already in the database.
+ * The customer is re-read through the same shop id first, so a customer id belonging to another
+ * shop can never be used to enumerate that shop's vehicles.
+ */
+export async function listCustomerVehicles(
+  session: Session,
+  stores: { vehicles: VehicleStore; customers: CustomerStore },
+  customerId: string,
+): Promise<Vehicle[]> {
+  requirePermission(session, "customers:read");
+  const shopId = session.user.shopId;
+
+  const customer = await stores.customers.findById(shopId, customerId);
+  if (!customer) throw new ApplicationError("NOT_FOUND", "Customer not found", 404);
+  requireSameShop(session, customer.shopId);
+
+  return stores.vehicles.listByCustomer(shopId, customerId);
 }
 
 export async function updateVehicleRecord(

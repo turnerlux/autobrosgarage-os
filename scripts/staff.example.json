@@ -1,0 +1,5 @@
+[
+  { "username": "owner", "displayName": "Owner", "role": "owner" },
+  { "username": "manager", "displayName": "Manager", "role": "manager" },
+  { "username": "tech1", "displayName": "Technician One", "role": "technician" }
+]

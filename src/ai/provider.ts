@@ -14,6 +14,13 @@ export interface AiMessage {
   content: string;
   /** Set on `role: "tool"` messages so the model can see the result of a prior tool call. */
   toolName?: string;
+  /**
+   * The id of the `AiToolCallRequest` this message answers. Required on `role: "tool"`
+   * messages: models may request several tools in one turn, and both Anthropic and OpenAI
+   * match a result to its call by id, not by name. Without it, two calls to the same tool in
+   * one turn cannot be told apart.
+   */
+  toolCallId?: string;
 }
 
 /** JSON-Schema-shaped tool description, e.g. from `zod`'s `z.toJSONSchema()`. */
@@ -31,6 +38,8 @@ export interface AiCompletionRequest {
 }
 
 export interface AiToolCallRequest {
+  /** Provider-assigned id for this specific call; echoed back on the matching tool result. */
+  id: string;
   name: string;
   arguments: unknown;
 }

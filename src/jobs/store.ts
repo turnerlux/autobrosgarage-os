@@ -13,6 +13,8 @@ export interface JobStore {
   search(shopId: string, queryText: string): Promise<Job[]>;
   /** Every job on record for one vehicle, newest first -- the basis for service history. */
   listByVehicle(shopId: string, vehicleId: string): Promise<Job[]>;
+  /** The shop's jobs, newest first -- the job board. Capped so one shop cannot load forever. */
+  listRecent(shopId: string, limit?: number): Promise<Job[]>;
 }
 
 export class InMemoryJobStore implements JobStore {
@@ -50,6 +52,14 @@ export class InMemoryJobStore implements JobStore {
     return [...this.jobsById.values()]
       .filter((job) => job.shopId === shopId && job.vehicleId === vehicleId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async listRecent(shopId: string, limit = 100): Promise<Job[]> {
+    return [...this.jobsById.values()]
+      .filter((job) => job.shopId === shopId)
+      .sort((a, b) => b.checkedInAt.getTime() - a.checkedInAt.getTime())
+      .slice(0, limit)
+      .map((job) => structuredClone(job));
   }
 }
 
@@ -98,6 +108,16 @@ export class DatabaseJobStore implements JobStore {
       .from(jobs)
       .where(and(eq(jobs.shopId, shopId), eq(jobs.vehicleId, vehicleId)))
       .orderBy(desc(jobs.createdAt));
+    return rows as Job[];
+  }
+
+  async listRecent(shopId: string, limit = 100): Promise<Job[]> {
+    const rows = await this.database
+      .select()
+      .from(jobs)
+      .where(eq(jobs.shopId, shopId))
+      .orderBy(desc(jobs.checkedInAt))
+      .limit(limit);
     return rows as Job[];
   }
 }

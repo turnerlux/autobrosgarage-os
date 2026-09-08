@@ -1,16 +1,43 @@
 import { randomBytes, randomUUID, scrypt as nodeScrypt } from "node:crypto";
 
+import { readFile } from "node:fs/promises";
+
 import pg from "pg";
 
-const staff = [
-  { username: "turner", displayName: "Turner", role: "owner" },
-  { username: "arthur", displayName: "Arthur", role: "manager" },
-  { username: "tuan", displayName: "Tuan", role: "technician" },
-  { username: "brennan", displayName: "Brennan", role: "technician" },
-  { username: "ryan", displayName: "Ryan", role: "technician" },
-  { username: "jared", displayName: "Jared", role: "technician" },
-  { username: "chase", displayName: "Chase", role: "technician" },
-];
+/**
+ * Staff are read from a local, git-ignored `staff.json` rather than hard-coded here.
+ *
+ * A committed roster publishes every valid username and each person's privilege level in a
+ * public repository. That is the hard half of a credential attack handed over for free, it
+ * names which account to target first, and -- because lockout is per username -- it lets a
+ * stranger lock real staff out with junk login attempts. It also publishes employees' names.
+ *
+ * Format (see `staff.example.json`):
+ *   [{ "username": "owner", "displayName": "Owner", "role": "owner" }]
+ * Roles: owner | manager | service_advisor | technician | bookkeeper
+ */
+const rosterPath = process.env.STAFF_ROSTER ?? new URL("./staff.json", import.meta.url);
+
+let staff;
+try {
+  staff = JSON.parse(await readFile(rosterPath, "utf8"));
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+  throw new Error(
+    "No staff roster found. Copy scripts/staff.example.json to scripts/staff.json and edit it. " +
+      "staff.json is git-ignored on purpose -- never commit real usernames or roles.",
+  );
+}
+
+if (!Array.isArray(staff) || staff.length === 0) {
+  throw new Error("The staff roster must be a non-empty JSON array.");
+}
+
+for (const account of staff) {
+  if (!account?.username || !account?.displayName || !account?.role) {
+    throw new Error("Each staff entry needs a username, displayName, and role.");
+  }
+}
 
 function scrypt(password, salt) {
   return new Promise((resolve, reject) => {
